@@ -45,7 +45,16 @@ app.use("/api/reports", reportsRouter);
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 
 // ── Socket handlers ──────────────────────────
-initSocketHandlers(io);
+const io = new Server(httpServer, {
+  cors: {
+    origin: process.env.CLIENT_URL || "*",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+  // These settings help with Render's proxy
+  transports: ["websocket", "polling"],
+  allowEIO3: true,
+});
 
 // ── Database + Start ─────────────────────────
 mongoose
