@@ -7,84 +7,81 @@ const morgan = require("morgan");
 const mongoose = require("mongoose");
 const { Server } = require("socket.io");
 
-const postsRouter = require("./routes/posts");
-const messagesRouter = require("./routes/messages");
-const roomsRouter = require("./routes/rooms");
-const reportsRouter = require("./routes/reports");
-const { initSocketHandlers } = require("./socket/handlers");
-const { globalRateLimiter } = require("./middleware/rateLimiter");
-
 const app = express();
 const httpServer = http.createServer(app);
 
-// ── Allowed origins ──────────────────────────
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  "http://localhost:5173",
-  "http://localhost:3000",
-].filter(Boolean);
-
-console.log("Allowed origins:", allowedOrigins);
-
-// ── Socket.IO ────────────────────────────────
-const io = new Server(httpServer, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-  transports: ["websocket", "polling"],
-  allowEIO3: true,
-  pingTimeout: 60000,
-  pingInterval: 25000,
-});
+// ── CORS — allow ALL origins (fixes the block) ──
+// We do this BEFORE everything else including helmet
+app.use(cors({
+  origin: "*",           // allow every origin
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-admin-secret"],
+}));
+app.options("*", cors()); // handle preflight for every route
 
 // ── Middleware ───────────────────────────────
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(morgan("dev"));
-
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    console.log("Blocked origin:", origin);
-    return callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "x-admin-secret"],
-}));
-
-app.options("*", cors()); // preflight
-
 app.use(express.json({ limit: "10kb" }));
-app.use(globalRateLimiter);
 
-// ── Routes ───────────────────────────────────
-app.use("/api/posts", postsRouter);
-app.use("/api/messages", messagesRouter);
-app.use("/api/rooms", roomsRouter);
-app.use("/api/reports", reportsRouter);
-
+// ── Health check ─────────────────────────────
 app.get("/health", (req, res) => {
-  res.json({ status: "ok", env: process.env.NODE_ENV, time: new Date().toISOString() });
+  res.json({ status: "ok", time: new Date().toISOString() });
 });
 
-// ── Socket ───────────────────────────────────
-initSocketHandlers(io);
+// ── Rate limiter ─────────────────────────────
+try {
+  const { globalRateLimiter } = require("./middleware/rateLimiter");
+  app.use(globalRateLimiter);
+} catch (e) {
+  console.error("Rate limiter load error:", e.message);
+}
 
-// ── DB + Start ───────────────────────────────
+// ── Routes ───────────────────────────────────
+try { app.use("/api/posts",    require("./routes/posts"));    console.log("✅ posts"); }
+  catch(e) { console.error("posts route error:", e.message); }
+
+try { app.use("/api/messages", require("./routes/messages")); console.log("✅ messages"); }
+  catch(e) { console.error("messages route error:", e.message); }
+
+try { app.use("/api/rooms",    require("./routes/rooms"));    console.log("✅ rooms"); }
+  catch(e) { console.error("rooms route error:", e.message); }
+
+try { app.use("/api/reports",  require("./routes/reports"));  console.log("✅ reports"); }
+  catch(e) { console.error("reports route error:", e.message); }
+
+// ── Global error handler ─────────────────────
+app.use((err, req, res, next) => {
+  console.error("🔥 Error:", err.message);
+  res.status(500).json({ error: err.message });
+});
+
+// ── Socket.IO ────────────────────────────────
+const io = new Server(httpServer, {
+  cors: { origin: "*", methods: ["GET", "POST"] },
+  transports: ["websocket", "polling"],
+  allowEIO3: true,
+});
+
+try {
+  const { initSocketHandlers } = require("./socket/handlers");
+  initSocketHandlers(io);
+  console.log("✅ socket");
+} catch(e) {
+  console.error("socket error:", e.message);
+}
+
+// ── MongoDB ───────────────────────────────────
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("✅ MongoDB connected");
     const PORT = process.env.PORT || 5000;
-    httpServer.listen(PORT, () => {
+    httpServer.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server on port ${PORT}`);
-      console.log(`CLIENT_URL = ${process.env.CLIENT_URL}`);
     });
   })
   .catch((err) => {
-    console.error("❌ MongoDB error:", err.message);
+    console.error("❌ MongoDB failed:", err.message);
     process.exit(1);
   });
