@@ -8,6 +8,8 @@ const postSchema = new mongoose.Schema(
     author: { type: String, required: true, trim: true, maxlength: 30 },
     authorColor: { type: String, default: "#7C3AED" }, // avatar color
     room: { type: String, default: "global" },
+    theme: { type: String, default: "default" }, // post card theme
+    quickReacts: { type: Map, of: Number, default: {} }, // emoji → count
     likes: { type: Number, default: 0 },
     likedBy: [String], // sessionIds that liked
     comments: [

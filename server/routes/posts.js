@@ -49,7 +49,8 @@ router.post(
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     try {
-      const { title, content, tags, author, authorColor, room, sessionId } = req.body;
+      const { title, content, tags, author, authorColor, room, sessionId, theme } = req.body;
+      const VALID_THEMES = ["default","ocean","sunset","forest","midnight","rose","aurora"];
       const post = await Post.create({
         title: clean(title),
         content: clean(content),
@@ -58,6 +59,7 @@ router.post(
         authorColor,
         room: room || "global",
         sessionId,
+        theme: VALID_THEMES.includes(theme) ? theme : "default",
       });
       res.status(201).json(post);
     } catch (err) {
@@ -65,6 +67,23 @@ router.post(
     }
   }
 );
+
+// ── GET /api/posts/trending-tags — top 10 tags by frequency
+router.get("/trending-tags", async (req, res) => {
+  try {
+    const agg = await Post.aggregate([
+      { $match: { hidden: false, tags: { $exists: true, $not: { $size: 0 } } } },
+      { $unwind: "$tags" },
+      { $group: { _id: "$tags", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 12 },
+    ]);
+    res.json(agg.map((a) => ({ tag: a._id, count: a.count })));
+  } catch (err) {
+    res.status(500).json([]);
+  }
+});
+
 
 // ── POST /api/posts/:id/like — toggle like
 router.post("/:id/like", async (req, res) => {
@@ -137,6 +156,25 @@ router.delete("/:id", async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete" });
+  }
+});
+
+// ── POST /api/posts/:id/react — quick emoji react
+router.post("/:id/react", async (req, res) => {
+  try {
+    const { emoji, sessionId } = req.body;
+    const ALLOWED = ["👍", "❤️", "😂", "😮", "🔥"];
+    if (!ALLOWED.includes(emoji)) return res.status(400).json({ error: "Invalid emoji" });
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: "Not found" });
+    const cur = post.quickReacts.get(emoji) || 0;
+    post.quickReacts.set(emoji, cur + 1);
+    await post.save();
+    const obj = {};
+    post.quickReacts.forEach((v, k) => { obj[k] = v; });
+    res.json({ quickReacts: obj });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to react" });
   }
 });
 
