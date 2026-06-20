@@ -33,7 +33,19 @@ export default function GEditNotepad() {
     
     socket.on("notepad_update", ({ content: newContent, by }) => {
       if (by !== username) {
-        setContent(newContent);
+        const textarea = textareaRef.current;
+        if (textarea) {
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          setContent(newContent);
+          setTimeout(() => {
+            try {
+              textarea.setSelectionRange(start, end);
+            } catch (e) {}
+          }, 0);
+        } else {
+          setContent(newContent);
+        }
       }
     });
 
