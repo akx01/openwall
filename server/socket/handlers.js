@@ -121,8 +121,8 @@ exports.initSocketHandlers = (io) => {
       io.to("global_notepad").emit("notepad_users", { users: activeNotepadUsers });
     });
 
-    socket.on("notepad_change", async ({ content, username }) => {
-      socket.to("global_notepad").emit("notepad_update", { content, by: username });
+    socket.on("notepad_change", async ({ content, username, sessionId }) => {
+      socket.to("global_notepad").emit("notepad_update", { content, by: username, sessionId });
       try {
         await Notepad.findOneAndUpdate(
           { name: "global" },

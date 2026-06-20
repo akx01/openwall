@@ -7,7 +7,7 @@ import { useUIStore } from "../../store/uiStore";
 const API = import.meta.env.VITE_API_URL || "/api";
 
 export default function GEditNotepad() {
-  const { username } = useUserStore();
+  const { username, sessionId } = useUserStore();
   const { showToast } = useUIStore();
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
@@ -32,7 +32,11 @@ export default function GEditNotepad() {
     // Check socket connection status
     setIsConnected(socket.connected);
 
-    const onConnect = () => setIsConnected(true);
+    // Auto-rejoin notepad room on connect/reconnect
+    const onConnect = () => {
+      setIsConnected(true);
+      socket.emit("notepad_join", { username });
+    };
     const onDisconnect = () => setIsConnected(false);
 
     socket.on("connect", onConnect);
@@ -41,11 +45,14 @@ export default function GEditNotepad() {
     // Socket events
     if (!socket.connected) {
       socket.connect();
+    } else {
+      socket.emit("notepad_join", { username });
     }
-    socket.emit("notepad_join", { username });
     
-    socket.on("notepad_update", ({ content: newContent, by }) => {
-      if (by !== username) {
+    socket.on("notepad_update", ({ content: newContent, by, sessionId: incomingSessionId }) => {
+      // Filter out self-updates using unique sessionId instead of username
+      // (This allows testing with the same username on phone + laptop!)
+      if (incomingSessionId !== sessionId) {
         const textarea = textareaRef.current;
         if (textarea) {
           const start = textarea.selectionStart;
@@ -73,13 +80,13 @@ export default function GEditNotepad() {
       socket.off("notepad_update");
       socket.off("notepad_users");
     };
-  }, []);
+  }, [username, sessionId]);
 
   const handleChange = (e) => {
     const val = e.target.value;
     setContent(val);
-    // Fires instantly on every character, space, and backspace
-    socket.emit("notepad_change", { content: val, username });
+    // Send content along with our unique sessionId
+    socket.emit("notepad_change", { content: val, username, sessionId });
   };
 
   if (loading) {
@@ -105,7 +112,6 @@ export default function GEditNotepad() {
           <p className="text-xs text-gray-400">Collaborate with other online users in real-time</p>
         </div>
         <div className="flex items-center gap-2">
-          {/* Connection Status Banner */}
           {!isConnected && (
             <span className="text-[10px] bg-red-50 text-red-500 dark:bg-red-950/20 dark:text-red-400 px-2 py-1 rounded-lg border border-red-200 dark:border-red-900/30">
               ⚠️ Offline Mode (Phone/Server unreachable)
