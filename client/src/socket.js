@@ -18,7 +18,6 @@ const getSocketUrl = () => {
 const socket = io(getSocketUrl(), {
   autoConnect: false,
   transports: ["websocket", "polling"],
-  withCredentials: true,
   reconnection: true,
   reconnectionAttempts: 5,
   reconnectionDelay: 1000,
