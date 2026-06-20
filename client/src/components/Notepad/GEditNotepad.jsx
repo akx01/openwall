@@ -29,6 +29,9 @@ export default function GEditNotepad() {
     fetchNotepad();
 
     // Socket events
+    if (!socket.connected) {
+      socket.connect();
+    }
     socket.emit("notepad_join", { username });
     
     socket.on("notepad_update", ({ content: newContent, by }) => {
