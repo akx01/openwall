@@ -1,17 +1,19 @@
 const Message = require("../models/Message");
 const Room = require("../models/Room");
+const Notepad = require("../models/Notepad");
 const { clean } = require("../middleware/profanityFilter");
 const { sanitizeString } = require("../middleware/sanitize");
 const roomManager = require("./roomManager");
 
 const typingTimers = {};
+let activeNotepadUsers = [];
 
 exports.initSocketHandlers = (io) => {
   io.on("connection", (socket) => {
     console.log("Connected:", socket.id);
 
+    // ── JOIN ROOM ─────────────────────────────
     socket.on("join_room", async ({ room, username, color, sessionId }) => {
-      // Check if user is banned from this room
       const roomDoc = await Room.findOne({ name: room });
       if (roomDoc && roomDoc.bannedUsers.includes(username)) {
         socket.emit("banned_from_room", { room });
@@ -43,6 +45,7 @@ exports.initSocketHandlers = (io) => {
       io.emit("online_count", roomManager.getTotalOnline());
     });
 
+    // ── SEND MESSAGE ──────────────────────────
     socket.on("send_message", async ({ room, content, author, authorColor, sessionId }) => {
       const clean_content = clean(sanitizeString(content));
       if (!clean_content || clean_content.length > 1000) return;
@@ -61,6 +64,7 @@ exports.initSocketHandlers = (io) => {
       }
     });
 
+    // ── DELETE MESSAGE ────────────────────────
     socket.on("delete_message", async ({ messageId, sessionId, room }) => {
       const msg = await Message.findById(messageId);
       if (!msg || msg.sessionId !== sessionId) return;
@@ -70,6 +74,7 @@ exports.initSocketHandlers = (io) => {
       io.to(room).emit("message_deleted", { messageId });
     });
 
+    // ── MESSAGE REACTION ──────────────────────
     socket.on("react_message", async ({ messageId, emoji, sessionId, room }) => {
       const msg = await Message.findById(messageId);
       if (!msg) return;
@@ -84,7 +89,7 @@ exports.initSocketHandlers = (io) => {
       });
     });
 
-    // Leader kicks a user — emits a force-leave event to that user's socket
+    // ── KICK USER ─────────────────────────────
     socket.on("kick_user", ({ room, targetUsername, leaderUsername }) => {
       const members = roomManager.getRoomMembers(room);
       const target = members.find(m => m.username === targetUsername);
@@ -92,6 +97,7 @@ exports.initSocketHandlers = (io) => {
       io.to(target.socketId).emit("kicked_from_room", { room, by: leaderUsername });
     });
 
+    // ── TYPING INDICATOR ──────────────────────
     socket.on("typing_start", ({ room, username }) => {
       socket.to(room).emit("typing", { username });
       clearTimeout(typingTimers[socket.id]);
@@ -105,6 +111,40 @@ exports.initSocketHandlers = (io) => {
       socket.to(room).emit("stop_typing", { username });
     });
 
+    // ── NOTEPAD COLLABORATION ──────────────────
+    socket.on("notepad_join", ({ username }) => {
+      socket.join("global_notepad");
+      socket.data.notepadUsername = username;
+      if (username && !activeNotepadUsers.includes(username)) {
+        activeNotepadUsers.push(username);
+      }
+      io.to("global_notepad").emit("notepad_users", { users: activeNotepadUsers });
+    });
+
+    socket.on("notepad_change", async ({ content, username }) => {
+      socket.to("global_notepad").emit("notepad_update", { content, by: username });
+      try {
+        await Notepad.findOneAndUpdate(
+          { name: "global" },
+          { content, updatedAt: new Date() },
+          { upsert: true }
+        );
+      } catch (err) {
+        console.error("Notepad save error:", err.message);
+      }
+    });
+
+    const handleNotepadLeave = () => {
+      const u = socket.data.notepadUsername;
+      if (u) {
+        activeNotepadUsers = activeNotepadUsers.filter((x) => x !== u);
+        io.to("global_notepad").emit("notepad_users", { users: activeNotepadUsers });
+      }
+    };
+
+    socket.on("notepad_leave", handleNotepadLeave);
+
+    // ── DISCONNECT ────────────────────────────
     socket.on("disconnect", async () => {
       const { room, username } = socket.data || {};
       if (room) {
@@ -114,6 +154,7 @@ exports.initSocketHandlers = (io) => {
         });
         await Room.findOneAndUpdate({ name: room }, { memberCount: roomManager.getMemberCount(room) });
       }
+      handleNotepadLeave();
       roomManager.leaveAllRooms(socket.id);
       clearTimeout(typingTimers[socket.id]);
       io.emit("online_count", roomManager.getTotalOnline());

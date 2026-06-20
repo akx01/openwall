@@ -50,6 +50,9 @@ try { app.use("/api/rooms",    require("./routes/rooms"));    console.log("✅ r
 try { app.use("/api/reports",  require("./routes/reports"));  console.log("✅ reports"); }
   catch(e) { console.error("reports route error:", e.message); }
 
+try { app.use("/api/notepad",  require("./routes/notepad"));  console.log("✅ notepad"); }
+  catch(e) { console.error("notepad route error:", e.message); }
+
 // ── Global error handler ─────────────────────
 app.use((err, req, res, next) => {
   console.error("🔥 Error:", err.message);
