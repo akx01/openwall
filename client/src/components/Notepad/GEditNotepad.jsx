@@ -12,6 +12,7 @@ export default function GEditNotepad() {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [editingUsers, setEditingUsers] = useState([]);
+  const [isConnected, setIsConnected] = useState(socket.connected);
   const textareaRef = useRef(null);
 
   // Load initial notepad content
@@ -27,6 +28,15 @@ export default function GEditNotepad() {
       }
     };
     fetchNotepad();
+
+    // Check socket connection status
+    setIsConnected(socket.connected);
+
+    const onConnect = () => setIsConnected(true);
+    const onDisconnect = () => setIsConnected(false);
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
 
     // Socket events
     if (!socket.connected) {
@@ -58,6 +68,8 @@ export default function GEditNotepad() {
 
     return () => {
       socket.emit("notepad_leave", { username });
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
       socket.off("notepad_update");
       socket.off("notepad_users");
     };
@@ -66,6 +78,7 @@ export default function GEditNotepad() {
   const handleChange = (e) => {
     const val = e.target.value;
     setContent(val);
+    // Fires instantly on every character, space, and backspace
     socket.emit("notepad_change", { content: val, username });
   };
 
@@ -80,17 +93,30 @@ export default function GEditNotepad() {
   return (
     <div className="flex-1 flex flex-col bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm p-4 overflow-hidden h-[calc(100vh-180px)] sm:h-[600px]">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800 mb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800 mb-3 gap-2">
         <div>
-          <h2 className="font-bold text-lg text-gray-900 dark:text-gray-50">Shared Notepad</h2>
+          <h2 className="font-bold text-lg text-gray-900 dark:text-gray-50 flex items-center gap-2">
+            Shared Notepad
+            <span 
+              className={`inline-block w-2.5 h-2.5 rounded-full ${isConnected ? "bg-green-500 animate-pulse" : "bg-red-500"}`} 
+              title={isConnected ? "Connected to socket server" : "Disconnected from socket server"}
+            />
+          </h2>
           <p className="text-xs text-gray-400">Collaborate with other online users in real-time</p>
         </div>
-        {editingUsers.length > 0 && (
-          <div className="flex items-center gap-1 bg-brand/10 text-brand dark:bg-brand/20 dark:text-brand-light text-xs font-semibold px-2 py-1 rounded-xl">
-            <span className="w-2 h-2 rounded-full bg-brand animate-pulse" />
-            {editingUsers.length} editing
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {/* Connection Status Banner */}
+          {!isConnected && (
+            <span className="text-[10px] bg-red-50 text-red-500 dark:bg-red-950/20 dark:text-red-400 px-2 py-1 rounded-lg border border-red-200 dark:border-red-900/30">
+              ⚠️ Offline Mode (Phone/Server unreachable)
+            </span>
+          )}
+          {editingUsers.length > 0 && (
+            <div className="flex items-center gap-1 bg-brand/10 text-brand dark:bg-brand/20 dark:text-brand-light text-xs font-semibold px-2 py-1 rounded-xl">
+              {editingUsers.length} editing
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Editor area */}
@@ -99,8 +125,9 @@ export default function GEditNotepad() {
           ref={textareaRef}
           value={content}
           onChange={handleChange}
-          placeholder="Type something here... everyone online will see and can edit this in real-time!"
-          className="w-full h-full bg-gray-50 dark:bg-gray-850 rounded-2xl p-4 text-sm text-gray-800 dark:text-gray-100 outline-none resize-none placeholder-gray-400 border border-transparent focus:border-brand/20"
+          disabled={!isConnected}
+          placeholder={isConnected ? "Type something here... everyone online will see and can edit this in real-time!" : "Connecting to server... real-time typing will resume once connected."}
+          className="w-full h-full bg-gray-50 dark:bg-gray-850 rounded-2xl p-4 text-sm text-gray-800 dark:text-gray-100 outline-none resize-none placeholder-gray-400 border border-transparent focus:border-brand/20 disabled:opacity-75"
         />
       </div>
     </div>
