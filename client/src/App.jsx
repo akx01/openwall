@@ -9,7 +9,7 @@ import Feed from "./components/Feed/Feed";
 import CreatePost from "./components/Feed/CreatePost";
 import PostModal from "./components/Feed/PostModal";
 import SettingsPage from "./pages/SettingsPage";
-import RoomBrowser from "./components/Rooms/RoomBrowser";
+import RoomListSection from "./components/Rooms/RoomListSection";
 import RoomOverlay from "./components/Rooms/RoomOverlay";
 import BottomNav from "./components/Mobile/BottomNav";
 import ToastContainer from "./components/UI/Toast";
@@ -57,13 +57,12 @@ function UsernameGate({ onSet }) {
 
 export default function App() {
   const { username, color, darkMode, toggleDarkMode } = useUserStore();
-  const { activeModal, openModal, closeModal, onlineCount } = useUIStore();
+  const { activeModal, openModal, closeModal } = useUIStore();
   const { loadRooms } = useChatStore();
-  const { activeRoom, closeRoom } = useRoomStore();
+  const { activeRoom } = useRoomStore();
 
   const [entered, setEntered] = useState(!!username);
   const [mobileTab, setMobileTab] = useState("home");
-  const [showRoomsBrowser, setShowRoomsBrowser] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
   // Connect Socket.IO
@@ -105,8 +104,10 @@ export default function App() {
               Home
             </button>
             <button
-              onClick={() => { setShowRoomsBrowser(true); }}
-              className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+              onClick={() => setMobileTab("rooms")}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
+                mobileTab === "rooms" ? "bg-brand/10 text-brand dark:bg-brand/20" : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
             >
               Rooms
             </button>
@@ -169,63 +170,20 @@ export default function App() {
           {/* Collaborative Notepad View */}
           {mobileTab === "notepad" && <GEditNotepad />}
 
-          {/* Rooms List page for mobile when clicked rooms tab */}
-          {mobileTab === "rooms" && (
-            <div className="glass-card p-6 rounded-3xl">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold">Chat Channels</h2>
-                <button
-                  onClick={() => setShowRoomsBrowser(true)}
-                  className="text-xs px-3 py-2 bg-brand text-white rounded-xl font-bold hover:bg-brand-dark transition"
-                >
-                  Browse Rooms
-                </button>
-              </div>
-              <p className="text-sm text-gray-400 mb-4">
-                Select a channel from the browser to chat live with other users.
-              </p>
-              {activeRoom ? (
-                <div className="p-4 bg-brand/5 border border-brand/10 rounded-2xl flex items-center justify-between">
-                  <div>
-                    <p className="font-bold text-brand">Currently in #{activeRoom.name}</p>
-                    <p className="text-xs text-gray-400">{activeRoom.description}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => openModal("chat")}
-                      className="text-xs px-3 py-1.5 bg-brand text-white rounded-xl font-semibold"
-                    >
-                      Open Chat
-                    </button>
-                    <button
-                      onClick={closeRoom}
-                      className="text-xs px-3 py-1.5 border border-gray-250 dark:border-gray-700 rounded-xl font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
-                    >
-                      Leave
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-400">
-                  <p className="text-3xl mb-1">💬</p>
-                  <p className="text-sm">No active room. Choose a room to get started!</p>
-                </div>
-              )}
-            </div>
-          )}
+          {/* Inline Rooms browser tab */}
+          {mobileTab === "rooms" && <RoomListSection />}
 
           {/* Mobile settings page tab */}
           {mobileTab === "settings" && <SettingsPage onClose={() => setMobileTab("home")} />}
         </div>
       </main>
 
-      {/* Floating RoomOverlay DM-style active room chat */}
+      {/* Full screen RoomOverlay active room chat */}
       {activeRoom && <RoomOverlay />}
 
       {/* Modals & Dialogs */}
       {activeModal === "createPost" && <CreatePost onClose={closeModal} />}
       {activeModal === "postDetail" && <PostModal />}
-      {showRoomsBrowser && <RoomBrowser onClose={() => setShowRoomsBrowser(false)} />}
       {showSettings && <SettingsPage onClose={() => setShowSettings(false)} />}
 
       {/* Bottom Nav for Mobile view users */}

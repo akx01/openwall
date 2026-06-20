@@ -12,6 +12,7 @@ export const useUserStore = create(
       darkMode: false,
       notifications: true,
       mutedUsers: [],
+      pinnedRooms: [],
 
       setUsername: (username) => set({ username }),
       setColor: (color) => set({ color }),
@@ -21,8 +22,12 @@ export const useUserStore = create(
         set((s) => ({ mutedUsers: [...new Set([...s.mutedUsers, username])] })),
       unmuteUser: (username) =>
         set((s) => ({ mutedUsers: s.mutedUsers.filter((u) => u !== username) })),
+      pinRoom: (roomName) =>
+        set((s) => ({ pinnedRooms: [...new Set([...s.pinnedRooms, roomName])] })),
+      unpinRoom: (roomName) =>
+        set((s) => ({ pinnedRooms: s.pinnedRooms.filter((r) => r !== roomName) })),
       clearSession: () =>
-        set({ username: "", color: generateColor(), sessionId: generateSessionId() }),
+        set({ username: "", color: generateColor(), sessionId: generateSessionId(), pinnedRooms: [] }),
     }),
     { name: "openwall-user" }
   )
