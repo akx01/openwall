@@ -26,6 +26,54 @@ function groupMessagesByTime(messages) {
   return groups;
 }
 
+function getRoomTheme(roomName) {
+  const name = roomName.toLowerCase();
+  if (name.includes("shayari") || name.includes("poetry") || name.includes("heart")) {
+    return {
+      bg: "bg-red-950/20 dark:bg-stone-900/40",
+      border: "border-red-900/50",
+      headerBg: "bg-red-950/80 dark:bg-stone-900/90",
+      accent: "text-red-500",
+      glow: "shadow-[0_0_20px_rgba(239,68,68,0.15)]",
+      inputBorder: "focus-within:border-red-500 focus-within:ring-red-500/10",
+      buttonBg: "bg-red-600 hover:bg-red-700",
+    };
+  }
+  if (name.includes("chill") || name.includes("lounge") || (name.includes("room") && !name.includes("global"))) {
+    return {
+      bg: "bg-amber-950/10 dark:bg-zinc-900/40",
+      border: "border-amber-900/30",
+      headerBg: "bg-amber-950/40 dark:bg-zinc-900/90",
+      accent: "text-amber-500",
+      glow: "shadow-[0_0_20px_rgba(245,158,11,0.15)]",
+      inputBorder: "focus-within:border-amber-500 focus-within:ring-amber-500/10",
+      buttonBg: "bg-amber-600 hover:bg-amber-700",
+    };
+  }
+  if (name.includes("tech") || name.includes("dev") || name.includes("code") || name.includes("admin")) {
+    return {
+      bg: "bg-black",
+      border: "border-yellow-500/30",
+      headerBg: "bg-navy-900/90",
+      accent: "text-yellow-500",
+      glow: "shadow-[0_0_25px_rgba(245,158,11,0.2)]",
+      inputBorder: "focus-within:border-yellow-500 focus-within:ring-yellow-500/10",
+      buttonBg: "bg-yellow-500 text-black hover:bg-yellow-600",
+    };
+  }
+
+  // Default theme (Standard Brand theme)
+  return {
+    bg: "bg-gray-50 dark:bg-navy-900",
+    border: "border-gray-100 dark:border-white/5",
+    headerBg: "bg-white/90 dark:bg-navy-800/90",
+    accent: "text-brand",
+    glow: "shadow-none",
+    inputBorder: "focus-within:border-brand/40 focus-within:ring-brand/10",
+    buttonBg: "bg-brand hover:bg-brand-dark shadow-brand/20",
+  };
+}
+
 export default function RoomOverlay() {
   const { activeRoom, closeRoom, roomMembers, setRoomMembers } = useRoomStore();
   const { messages, typingUsers, loadMessages } = useChatStore();
@@ -105,18 +153,20 @@ export default function RoomOverlay() {
     await axios.post(`${API}/rooms/${activeRoom.name}/ban`, { leaderUsername: username, targetUsername: target });
   };
 
+  const theme = getRoomTheme(activeRoom.name);
+
   const togglePin = () => {
     isPinned ? unpinRoom(activeRoom.name) : pinRoom(activeRoom.name);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex bg-gray-50 dark:bg-navy-900 animate-fade-slide">
+    <div className={`fixed inset-0 z-50 flex animate-fade-slide ${theme.bg} ${theme.glow}`}>
 
       {/* ─── Chat Panel ───────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0">
 
         {/* Header */}
-        <div className="h-14 shrink-0 flex items-center justify-between px-4 border-b border-gray-100 dark:border-white/5 bg-white/90 dark:bg-navy-800/90 backdrop-blur-xl">
+        <div className={`h-14 shrink-0 flex items-center justify-between px-4 border-b backdrop-blur-xl ${theme.border} ${theme.headerBg}`}>
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={closeRoom}
@@ -233,8 +283,8 @@ export default function RoomOverlay() {
         )}
 
         {/* Input area */}
-        <div className="p-3 border-t border-gray-100 dark:border-white/5 bg-white/90 dark:bg-navy-800/90 backdrop-blur-xl">
-          <div className="flex gap-2 items-end bg-gray-50 dark:bg-navy-700/60 rounded-2xl px-4 py-2.5 border border-gray-200 dark:border-white/8 focus-within:border-brand/40 focus-within:ring-2 focus-within:ring-brand/10 transition-all">
+        <div className={`p-3 border-t backdrop-blur-xl ${theme.border} ${theme.headerBg}`}>
+          <div className={`flex gap-2 items-end bg-gray-50 dark:bg-navy-700/60 rounded-2xl px-4 py-2.5 border border-gray-200 dark:border-white/8 focus-within:ring-2 transition-all ${theme.inputBorder}`}>
             <textarea
               ref={inputRef}
               value={input}
@@ -259,7 +309,7 @@ export default function RoomOverlay() {
               <button
                 onClick={handleSend}
                 disabled={!input.trim()}
-                className="w-8 h-8 bg-brand text-white rounded-xl flex items-center justify-center text-sm font-bold disabled:opacity-30 transition-all active:scale-90 hover:bg-brand-dark shadow-sm shadow-brand/20"
+                className={`w-8 h-8 text-white rounded-xl flex items-center justify-center text-sm font-bold disabled:opacity-30 transition-all active:scale-90 shadow-sm ${theme.buttonBg}`}
               >
                 ↑
               </button>

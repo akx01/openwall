@@ -24,12 +24,21 @@ export default function PostCard({ post, index = 0 }) {
   const [localReacts, setLocalReacts] = useState(post.quickReacts || {});
   const [showReactBar, setShowReactBar] = useState(false);
   const [reactingEmoji, setReactingEmoji] = useState(null);
+  const [coords, setCoords] = useState({ x: 0, y: 0 });
 
   const liked = post.likedBy?.includes(sessionId);
   const postTheme = getTheme(post.theme);
   const isPremium = PREMIUM_THEMES.has(post.theme);
   const isStyled = post.theme && post.theme !== "default";
   const isCentered = postTheme.align === "center";
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setCoords({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
 
   const handleCopy = (e) => {
     e.stopPropagation();
@@ -72,12 +81,21 @@ export default function PostCard({ post, index = 0 }) {
   return (
     <div
       onClick={() => openModal("postDetail", post)}
+      onMouseMove={handleMouseMove}
       className={`group/card relative w-full max-w-lg aspect-[4/5] md:aspect-[3/4] rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-500 animate-slide-up ${staggerClass} ${postTheme.css} ${
         !isStyled
           ? "bg-gradient-to-br from-gray-900 via-gray-950 to-navy-950 text-white border border-white/10 shadow-2xl hover:border-white/20"
           : "text-white shadow-2xl"
       }`}
     >
+      {/* Spotlight overlay (cyber-warm red/yellow glowing cursor spotlight) */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 z-20"
+        style={{
+          background: `radial-gradient(350px circle at ${coords.x}px ${coords.y}px, rgba(245, 158, 11, 0.08), transparent 80%)`,
+        }}
+      />
+
       {/* Dynamic theme layer (stars, glitch lines, etc.) */}
       {isPremium && <PostThemeLayer theme={post.theme} />}
 
@@ -137,7 +155,7 @@ export default function PostCard({ post, index = 0 }) {
         <div className="flex items-center gap-3 pr-16">
           <div className="relative shrink-0">
             {/* Glowing avatar ring */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-brand to-pink-500 blur-sm opacity-70 animate-pulse" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-brand to-yellow-500 blur-sm opacity-70 animate-pulse" />
             <div className="relative">
               <Avatar username={post.author} color={post.authorColor} size="md" />
             </div>
@@ -190,7 +208,7 @@ export default function PostCard({ post, index = 0 }) {
         {/* Comment */}
         <div className="flex flex-col items-center">
           <button
-            onClick={() => openModal("postDetail", post)}
+            onClick={() => openModal("postDetail", { ...post, focusComment: true })}
             className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-white/20 hover:scale-105 active:scale-95 transition-all shadow-lg"
           >
             💬

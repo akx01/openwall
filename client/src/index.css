@@ -30,16 +30,16 @@
 .aurora-bg {
   background-color: #f8faff;
   background-image:
-    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(124,58,237,0.10) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 90% 80%, rgba(6,182,212,0.07) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 60% at 0% 60%, rgba(217,70,239,0.05) 0%, transparent 50%);
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(239,68,68,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 80%, rgba(245,158,11,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 60% at 0% 60%, rgba(220,38,38,0.05) 0%, transparent 50%);
 }
 .dark .aurora-bg {
-  background-color: #0A0E1A;
+  background-color: #080808;
   background-image:
-    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(124,58,237,0.20) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 90% 80%, rgba(6,182,212,0.12) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 60% at 0% 60%, rgba(217,70,239,0.10) 0%, transparent 50%);
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(239,68,68,0.20) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 80%, rgba(245,158,11,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 60% at 0% 60%, rgba(220,38,38,0.10) 0%, transparent 50%);
 }
 
 /* ─────────────────────────────────────────────
@@ -57,7 +57,7 @@
   @apply border-gray-200 dark:border-brand/20;
 }
 .dark .glass-card:hover {
-  box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,58,237,0.15);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(239,68,68,0.15);
 }
 
 /* ─────────────────────────────────────────────
@@ -329,15 +329,15 @@
   position: absolute;
   inset: -1px;
   border-radius: inherit;
-  background: linear-gradient(135deg, #7C3AED, #06b6d4);
+  background: linear-gradient(135deg, #EF4444, #F59E0B);
   z-index: -1;
 }
 
 .brand-glow {
-  box-shadow: 0 0 0 1px rgba(124,58,237,0.3), 0 4px 24px rgba(124,58,237,0.2);
+  box-shadow: 0 0 0 1px rgba(239,68,68,0.3), 0 4px 24px rgba(239,68,68,0.2);
 }
 .brand-glow:hover {
-  box-shadow: 0 0 0 2px rgba(124,58,237,0.5), 0 8px 40px rgba(124,58,237,0.3);
+  box-shadow: 0 0 0 2px rgba(239,68,68,0.5), 0 8px 40px rgba(239,68,68,0.3);
 }
 
 /* ─────────────────────────────────────────────
@@ -347,8 +347,8 @@
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.18); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(100,116,139,0.35); }
-.dark ::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.2); }
-.dark ::-webkit-scrollbar-thumb:hover { background: rgba(124,58,237,0.4); }
+.dark ::-webkit-scrollbar-thumb { background: rgba(239,68,68,0.2); }
+.dark ::-webkit-scrollbar-thumb:hover { background: rgba(239,68,68,0.4); }
 
 /* ─────────────────────────────────────────────
    ANIMATION UTILITIES
@@ -499,9 +499,9 @@
    REPLY QUOTE
 ───────────────────────────────────────────── */
 .reply-preview {
-  border-left: 3px solid #7C3AED;
+  border-left: 3px solid #EF4444;
   padding: 4px 10px;
-  background: rgba(124,58,237,0.08);
+  background: rgba(239,68,68,0.08);
   border-radius: 0 8px 8px 0;
 }
 
@@ -519,7 +519,7 @@
   transform: translateX(-50%);
   width: 16px;
   height: 2px;
-  background: #7C3AED;
+  background: #EF4444;
   border-radius: 99px;
 }
 
@@ -531,7 +531,7 @@
 }
 .trending-tag:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(124,58,237,0.25);
+  box-shadow: 0 4px 12px rgba(239,68,68,0.25);
 }
 
 /* ─────────────────────────────────────────────
@@ -541,7 +541,7 @@
   transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
 }
 .room-card-glow:hover {
-  box-shadow: 0 0 0 1px rgba(124,58,237,0.2), 0 8px 32px rgba(124,58,237,0.12);
+  box-shadow: 0 0 0 1px rgba(239,68,68,0.2), 0 8px 32px rgba(239,68,68,0.12);
   transform: translateY(-2px);
 }
 
@@ -570,7 +570,7 @@
 }
 .react-btn:hover {
   transform: scale(1.35);
-  background: rgba(124,58,237,0.1);
+  background: rgba(239,68,68,0.1);
 }
 
 /* ─────────────────────────────────────────────
@@ -609,7 +609,7 @@
 .auth-floating-label input:focus + label,
 .auth-floating-label input:not(:placeholder-shown) + label {
   transform: translateY(-1.4rem) scale(0.8);
-  color: #7C3AED;
+  color: #EF4444;
 }
 .auth-floating-label label {
   position: absolute;
@@ -642,7 +642,7 @@
 }
 .theme-preview-card.selected {
   transform: scale(1.08);
-  box-shadow: 0 0 0 3px #7C3AED, 0 6px 20px rgba(124,58,237,0.3);
+  box-shadow: 0 0 0 3px #EF4444, 0 6px 20px rgba(239,68,68,0.3);
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -653,4 +653,53 @@
 .no-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+/* ─────────────────────────────────────────────
+   TELEGRAM SINGLE EMOJI ANIMATIONS
+───────────────────────────────────────────── */
+@keyframes telegram-heart {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.15); }
+  40% { transform: scale(1.05); }
+  60% { transform: scale(1.25); }
+}
+@keyframes telegram-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-20px) scale(0.9) rotate(5deg); }
+  50% { transform: translateY(0) scale(1.05) rotate(-5deg); }
+  70% { transform: translateY(-5px) scale(1) rotate(2deg); }
+}
+@keyframes telegram-wobble {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  15% { transform: rotate(-15deg) scale(1.1); }
+  30% { transform: rotate(10deg) scale(1.1); }
+  45% { transform: rotate(-10deg) scale(1.1); }
+  60% { transform: rotate(5deg) scale(1.1); }
+}
+@keyframes telegram-fire {
+  0%, 100% { transform: scale(1) skewY(0deg); filter: drop-shadow(0 0 10px rgba(245,158,11,0.5)); }
+  30% { transform: scale(1.1) skewY(-3deg) scaleY(1.15); filter: drop-shadow(0 0 25px rgba(239,68,68,0.8)); }
+  60% { transform: scale(0.95) skewY(3deg) scaleY(0.95); filter: drop-shadow(0 0 15px rgba(245,158,11,0.6)); }
+}
+
+.animate-tg-heart {
+  animation: telegram-heart 1.2s ease-in-out infinite;
+  display: inline-block;
+  transform-origin: center;
+}
+.animate-tg-bounce {
+  animation: telegram-bounce 1.4s ease-in-out infinite;
+  display: inline-block;
+  transform-origin: bottom center;
+}
+.animate-tg-wobble {
+  animation: telegram-wobble 1.6s ease-in-out infinite;
+  display: inline-block;
+  transform-origin: center;
+}
+.animate-tg-fire {
+  animation: telegram-fire 1.3s ease-in-out infinite;
+  display: inline-block;
+  transform-origin: bottom center;
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useUIStore } from "../../store/uiStore";
 import { useUserStore } from "../../store/userStore";
 import Avatar from "../UI/Avatar";
@@ -13,6 +13,18 @@ export default function PostModal() {
   const { username, color, sessionId } = useUserStore();
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState(selectedPost?.comments || []);
+
+  const inputRef = useRef(null);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (selectedPost?.focusComment) {
+      setTimeout(() => {
+        inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+        inputRef.current?.focus();
+      }, 300);
+    }
+  }, [selectedPost]);
 
   if (!selectedPost) return null;
 
@@ -39,6 +51,7 @@ export default function PostModal() {
       onClick={closeModal}
     >
       <div
+        ref={containerRef}
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-2xl max-h-[88vh] overflow-y-auto rounded-3xl shadow-2xl animate-scale-in"
       >
@@ -134,6 +147,7 @@ export default function PostModal() {
             <Avatar username={username} color={color} size="sm" />
             <div className="flex-1 flex gap-2">
               <input
+                ref={inputRef}
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleComment()}

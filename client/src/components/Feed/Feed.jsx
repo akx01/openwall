@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import PostCard from "./PostCard";
+import StoriesFeed from "./StoriesFeed";
 import SkeletonCard from "../UI/SkeletonCard";
 import TrendingTags from "../UI/TrendingTags";
 import Confetti from "../UI/Confetti";
@@ -39,7 +40,8 @@ export default function Feed() {
     <div className="flex-1 space-y-4">
       <Confetti active={confettiActive} onDone={() => setConfettiActive(false)} />
 
-
+      {/* Stories Feed */}
+      <StoriesFeed />
 
       {/* Toolbar */}
       <div className="flex flex-wrap gap-3 items-center w-full max-w-2xl mx-auto">

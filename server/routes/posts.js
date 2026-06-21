@@ -15,10 +15,20 @@ router.get("/", async (req, res) => {
     if (room) query.room = room;
     if (tag) query.tags = tag;
     if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { author: { $regex: search, $options: "i" } }
-      ];
+      const words = search.trim().split(/\s+/).filter(Boolean);
+      if (words.length > 0) {
+        query.$and = words.map(word => {
+          const escaped = word.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+          const regexObj = { $regex: escaped, $options: "i" };
+          return {
+            $or: [
+              { title: regexObj },
+              { author: regexObj },
+              { content: regexObj }
+            ]
+          };
+        });
+      }
     }
 
     let sortObj = {};

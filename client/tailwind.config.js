@@ -6,10 +6,10 @@ export default {
     extend: {
       colors: {
         brand: {
-          DEFAULT: "#7C3AED",
-          light: "#A78BFA",
-          dark: "#5B21B6",
-          glow: "rgba(124,58,237,0.35)",
+          DEFAULT: "#EF4444",
+          light: "#F59E0B",
+          dark: "#B91C1C",
+          glow: "rgba(239, 68, 68, 0.35)",
         },
         surface: {
           DEFAULT: "#ffffff",
@@ -28,9 +28,9 @@ export default {
       },
       backgroundImage: {
         "aurora-light":
-          "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(124,58,237,0.12) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 90% 80%, rgba(6,182,212,0.08) 0%, transparent 55%), radial-gradient(ellipse 50% 60% at 0% 60%, rgba(217,70,239,0.06) 0%, transparent 50%)",
+          "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(239,68,68,0.12) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 90% 80%, rgba(245,158,11,0.08) 0%, transparent 55%), radial-gradient(ellipse 50% 60% at 0% 60%, rgba(220,38,38,0.06) 0%, transparent 50%)",
         "aurora-dark":
-          "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(124,58,237,0.22) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 90% 80%, rgba(6,182,212,0.12) 0%, transparent 55%), radial-gradient(ellipse 50% 60% at 0% 60%, rgba(217,70,239,0.1) 0%, transparent 50%)",
+          "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(239,68,68,0.22) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 90% 80%, rgba(245,158,11,0.12) 0%, transparent 55%), radial-gradient(ellipse 50% 60% at 0% 60%, rgba(220,38,38,0.1) 0%, transparent 50%)",
       },
       animation: {
         "fade-slide": "fade-slide-in 0.3s cubic-bezier(0.16,1,0.3,1) both",
@@ -60,8 +60,8 @@ export default {
           to: { opacity: 1, transform: "scale(1)" },
         },
         "glow-pulse": {
-          "0%,100%": { boxShadow: "0 0 20px rgba(124,58,237,0.15)" },
-          "50%": { boxShadow: "0 0 40px rgba(124,58,237,0.35)" },
+          "0%,100%": { boxShadow: "0 0 20px rgba(239,68,68,0.15)" },
+          "50%": { boxShadow: "0 0 40px rgba(239,68,68,0.35)" },
         },
         shimmer: {
           from: { backgroundPosition: "-200% 0" },
@@ -93,11 +93,11 @@ export default {
         },
       },
       boxShadow: {
-        "glow-brand": "0 0 0 1px rgba(124,58,237,0.3), 0 4px 24px rgba(124,58,237,0.2)",
-        "glow-brand-lg": "0 0 0 2px rgba(124,58,237,0.4), 0 8px 40px rgba(124,58,237,0.3)",
+        "glow-brand": "0 0 0 1px rgba(239,68,68,0.3), 0 4px 24px rgba(239,68,68,0.2)",
+        "glow-brand-lg": "0 0 0 2px rgba(239,68,68,0.4), 0 8px 40px rgba(239,68,68,0.3)",
         "card-hover": "0 8px 30px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)",
         "dark-card": "0 4px 24px rgba(0,0,0,0.4)",
-        "dark-card-hover": "0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,58,237,0.15)",
+        "dark-card-hover": "0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(239,68,68,0.15)",
       },
       transitionTimingFunction: {
         spring: "cubic-bezier(0.34, 1.56, 0.64, 1)",

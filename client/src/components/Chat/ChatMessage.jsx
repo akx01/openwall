@@ -7,6 +7,42 @@ import socket from "../../socket";
 import { useChatStore } from "../../store/chatStore";
 import { useUIStore } from "../../store/uiStore";
 
+function getSingleEmojiClass(content) {
+  const str = content.trim();
+  
+  // Regex to check if pictographs are present (excluding basic ASCII digits and characters)
+  const isEmoji = /^[\p{Extended_Pictographic}\u200d\ufe0f\u{1F3FB}-\u{1F3FF}]+$/u.test(str);
+  if (!isEmoji) return null;
+  
+  // Count visual grapheme segments
+  let segmentCount = 0;
+  try {
+    const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" });
+    const segments = [...segmenter.segment(str)];
+    segmentCount = segments.length;
+  } catch (e) {
+    segmentCount = [...str].length;
+  }
+
+  if (segmentCount !== 1) return null;
+
+  // Map to Telegram animated style classes
+  if (str.includes("❤️") || str.includes("💖") || str === "😍" || str === "💕") {
+    return "animate-tg-heart text-6xl py-2 filter drop-shadow-[0_0_15px_rgba(239,68,68,0.4)]";
+  }
+  if (str.includes("🔥")) {
+    return "animate-tg-fire text-6xl py-2";
+  }
+  if (str.includes("👍") || str === "👏" || str === "🙌") {
+    return "animate-tg-bounce text-6xl py-2 filter drop-shadow-[0_0_10px_rgba(245,158,11,0.25)]";
+  }
+  if (str.includes("😂") || str === "🤣" || str === "😆" || str === "😜") {
+    return "animate-tg-wobble text-6xl py-2";
+  }
+  
+  return "animate-tg-wobble text-6xl py-2";
+}
+
 export default function ChatMessage({ message, onReply }) {
   const { sessionId, mutedUsers } = useUserStore();
   const { currentRoom } = useChatStore();
@@ -16,6 +52,7 @@ export default function ChatMessage({ message, onReply }) {
   if (mutedUsers.includes(message.author)) return null;
 
   const isOwn = message.sessionId === sessionId;
+  const emojiClass = getSingleEmojiClass(message.content);
 
   const handleDelete = () => {
     socket.emit("delete_message", { messageId: message._id, sessionId, room: currentRoom });
@@ -63,15 +100,21 @@ export default function ChatMessage({ message, onReply }) {
         )}
 
         {/* Bubble */}
-        <div
-          className={`px-3.5 py-2 rounded-2xl text-sm leading-relaxed max-w-full break-words ${
-            isOwn
-              ? "bg-brand text-white rounded-tr-sm shadow-sm shadow-brand/20"
-              : "bg-white dark:bg-navy-700 text-gray-900 dark:text-gray-100 rounded-tl-sm border border-gray-100 dark:border-white/5 shadow-sm"
-          }`}
-        >
-          {message.content}
-        </div>
+        {emojiClass ? (
+          <div className={`${emojiClass} select-none`}>
+            {message.content}
+          </div>
+        ) : (
+          <div
+            className={`px-3.5 py-2 rounded-2xl text-sm leading-relaxed max-w-full break-words ${
+              isOwn
+                ? "bg-brand text-white rounded-tr-sm shadow-sm shadow-brand/20"
+                : "bg-white dark:bg-navy-700 text-gray-900 dark:text-gray-100 rounded-tl-sm border border-gray-100 dark:border-white/5 shadow-sm"
+            }`}
+          >
+            {message.content}
+          </div>
+        )}
 
         {/* Reactions */}
         {message.reactions && Object.keys(message.reactions).length > 0 && (
