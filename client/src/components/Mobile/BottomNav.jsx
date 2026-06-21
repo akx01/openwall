@@ -2,6 +2,7 @@ export default function BottomNav({ activeTab, onChangeTab, hasActiveRoom }) {
   const tabs = [
     { id: "home",     label: "Home",     icon: "🏠" },
     { id: "rooms",    label: "Rooms",    icon: "💬" },
+    { id: "write",    label: "Write",    icon: "✍️" },
     { id: "notepad",  label: "Notepad",  icon: "📝" },
     { id: "settings", label: "Profile",  icon: "⚙️" },
   ];

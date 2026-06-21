@@ -7,6 +7,7 @@ import { useSocket } from "./hooks/useSocket";
 
 import Feed from "./components/Feed/Feed";
 import PostModal from "./components/Feed/PostModal";
+import QuickCompose from "./components/Feed/CreatePost";
 import SettingsPage from "./pages/SettingsPage";
 import RoomListSection from "./components/Rooms/RoomListSection";
 import RoomOverlay from "./components/Rooms/RoomOverlay";
@@ -286,6 +287,12 @@ export default function App() {
           <NavLink active={mobileTab === "home"} onClick={() => setMobileTab("home")}>🏠 Home</NavLink>
           <NavLink active={mobileTab === "rooms"} onClick={() => setMobileTab("rooms")}>💬 Rooms</NavLink>
           <NavLink active={mobileTab === "notepad"} onClick={() => setMobileTab("notepad")}>📝 Notepad</NavLink>
+          <button
+            onClick={() => openModal("createPost")}
+            className="px-4 py-2 rounded-xl text-sm font-semibold transition-all text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-1.5"
+          >
+            ✍️ Write
+          </button>
         </nav>
 
         {/* Right controls */}
@@ -324,13 +331,20 @@ export default function App() {
 
       {/* ─── Overlays & Modals ───────────────────── */}
       {activeRoom && <RoomOverlay />}
+      {activeModal === "createPost" && <QuickCompose onClose={closeModal} />}
       {activeModal === "postDetail" && <PostModal />}
       {showSettings && <SettingsPage onClose={() => setShowSettings(false)} />}
 
       {/* ─── Bottom Nav (Mobile) ─────────────────── */}
       <BottomNav
         activeTab={mobileTab}
-        onChangeTab={setMobileTab}
+        onChangeTab={(tabId) => {
+          if (tabId === "write") {
+            openModal("createPost");
+          } else {
+            setMobileTab(tabId);
+          }
+        }}
         hasActiveRoom={!!activeRoom}
       />
 

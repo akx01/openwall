@@ -1,15 +1,11 @@
 import { useState, useRef } from "react";
-import Masonry from "react-masonry-css";
 import PostCard from "./PostCard";
-import QuickCompose from "./CreatePost";
 import SkeletonCard from "../UI/SkeletonCard";
 import TrendingTags from "../UI/TrendingTags";
 import Confetti from "../UI/Confetti";
 import { usePosts } from "../../hooks/usePosts";
 import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
 import { debounce } from "../../utils/helpers";
-
-const BREAKPOINTS = { default: 3, 1100: 2, 700: 1 };
 const SORT_OPTIONS = [
   { value: "latest", label: "🕐 Latest" },
   { value: "liked", label: "❤️ Most Liked" },
@@ -42,8 +38,7 @@ export default function Feed() {
     <div className="flex-1 space-y-4">
       <Confetti active={confettiActive} onDone={() => setConfettiActive(false)} />
 
-      {/* Inline QuickCompose */}
-      <QuickCompose onPublished={handlePublished} />
+
 
       {/* Toolbar */}
       <div className="flex flex-wrap gap-2 items-center">
@@ -85,21 +80,25 @@ export default function Feed() {
         </div>
       )}
 
-      {/* Masonry grid */}
+      {/* Centered post feed */}
       {!loading && posts.length === 0 ? (
         <div className="text-center py-20 text-gray-400 animate-fade-slide">
           <p className="text-5xl mb-3">📝</p>
           <p className="font-semibold text-lg">No posts yet</p>
-          <p className="text-sm mt-1">Be the first to write something above!</p>
+          <p className="text-sm mt-1">Be the first to write a post from the navigation bar!</p>
         </div>
       ) : (
-        <Masonry breakpointCols={BREAKPOINTS} className="masonry-grid" columnClassName="masonry-grid-col">
+        <div className="flex flex-col items-center gap-8 max-w-2xl mx-auto w-full">
           {posts.map((post, i) => (
             <PostCard key={post._id} post={post} index={i} />
           ))}
           {loading &&
-            Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={`skel-${i}`} />)}
-        </Masonry>
+            Array.from({ length: 3 }).map((_, i) => (
+              <div key={`skel-${i}`} className="w-full">
+                <SkeletonCard />
+              </div>
+            ))}
+        </div>
       )}
 
       {/* Infinite scroll sentinel */}

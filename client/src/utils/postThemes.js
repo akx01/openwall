@@ -1,4 +1,4 @@
-// 8 Premium Animated Post Templates
+// 3 Premium Animated Post Templates
 // All use 4:3 aspect ratio (400px × 300px rendered)
 
 export const POST_THEMES = [
@@ -16,18 +16,6 @@ export const POST_THEMES = [
   // ─── PREMIUM ANIMATED TEMPLATES ───────────────────────────────
 
   {
-    id: "burning",
-    label: "Burning Paper",
-    css: "post-theme-burning",
-    preview: "#c8a06a",
-    dark: false,
-    icon: "🔥",
-    font: "'Georgia', 'Times New Roman', serif",
-    align: "center",
-    animated: true,
-    description: "Realistic burning edges with fire animation",
-  },
-  {
     id: "starfield",
     label: "Starfield",
     css: "post-theme-starfield",
@@ -38,42 +26,6 @@ export const POST_THEMES = [
     align: "center",
     animated: true,
     description: "Deep black with animated twinkling stars",
-  },
-  {
-    id: "neon-sign",
-    label: "Neon Sign",
-    css: "post-theme-neon-sign",
-    preview: "#0a001f",
-    dark: true,
-    icon: "💡",
-    font: null,
-    align: "center",
-    animated: true,
-    description: "Neon glow with realistic flicker animation",
-  },
-  {
-    id: "liquid",
-    label: "Liquid Glass",
-    css: "post-theme-liquid",
-    preview: "#0d1b4b",
-    dark: true,
-    icon: "🫧",
-    font: null,
-    align: "left",
-    animated: true,
-    description: "Animated morphing gradient blobs",
-  },
-  {
-    id: "hologram",
-    label: "Hologram",
-    css: "post-theme-hologram",
-    preview: "#001a33",
-    dark: true,
-    icon: "🔷",
-    font: null,
-    align: "left",
-    animated: true,
-    description: "Iridescent holographic shimmer",
   },
   {
     id: "glitch",
@@ -98,18 +50,6 @@ export const POST_THEMES = [
     align: "center",
     animated: false,
     description: "Vintage polaroid photo with film grain",
-  },
-  {
-    id: "ink",
-    label: "Ink Drop",
-    css: "post-theme-ink",
-    preview: "#fafafa",
-    dark: false,
-    icon: "🖋️",
-    font: "'Georgia', 'Times New Roman', serif",
-    align: "center",
-    animated: true,
-    description: "Ink spreading on white paper",
   },
 ];
 

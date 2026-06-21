@@ -14,7 +14,7 @@ const API = import.meta.env.VITE_API_URL || "/api";
 const QUICK_REACTS = ["👍", "❤️", "😂", "😮", "🔥", "🎉", "😍"];
 
 // Themes that use 4:3 aspect ratio (premium templates)
-const PREMIUM_THEMES = new Set(["burning", "starfield", "neon-sign", "liquid", "hologram", "glitch", "polaroid", "ink"]);
+const PREMIUM_THEMES = new Set(["starfield", "glitch", "polaroid"]);
 
 export default function PostCard({ post, index = 0 }) {
   const { sessionId } = useUserStore();
@@ -80,7 +80,7 @@ export default function PostCard({ post, index = 0 }) {
           : "border border-transparent shadow-md hover:shadow-xl hover:-translate-y-1"
       }`}
     >
-      {/* Dynamic theme layer (stars, fire embers, liquid blobs, etc.) */}
+      {/* Dynamic theme layer (stars, glitch lines, etc.) */}
       {isPremium && <PostThemeLayer theme={post.theme} />}
 
       {/* Content wrapper */}
@@ -111,20 +111,20 @@ export default function PostCard({ post, index = 0 }) {
         )}
 
         {/* Content */}
-        <div className="flex-1">
+        <div className="flex-1 overflow-y-auto no-scrollbar">
           <h3
-            className={`font-bold mb-2 leading-snug post-title ${
+            className={`font-bold mb-3 leading-snug post-title ${
               isStyled ? "" : "text-gray-900 dark:text-gray-50"
-            } ${isPremium ? "text-lg" : "line-clamp-2"}`}
+            } ${isPremium ? "text-xl md:text-2xl" : "text-lg md:text-xl line-clamp-2"}`}
             style={fontStyle}
           >
             {post.title}
           </h3>
           <p
-            className={`text-sm leading-relaxed post-body ${
+            className={`leading-relaxed post-body ${
               isStyled ? "" : "text-gray-600 dark:text-gray-300"
-            } ${isPremium ? "line-clamp-4 text-[15px]" : "line-clamp-3"}`}
-            style={fontStyle}
+            } ${isPremium ? "text-base md:text-lg line-clamp-[10]" : "text-sm md:text-base"}`}
+            style={{ ...fontStyle, whiteSpace: "pre-wrap" }}
           >
             {post.content}
           </p>

@@ -19,19 +19,6 @@ export default function PostThemeLayer({ theme }) {
     }));
   }, [theme]);
 
-  // Fire ember particles for burning paper
-  const embers = useMemo(() => {
-    if (theme !== "burning") return [];
-    return Array.from({ length: 16 }, (_, i) => ({
-      id: i,
-      x: 5 + Math.random() * 90, // % across
-      startY: 85 + Math.random() * 15, // % from top
-      delay: Math.random() * 3,
-      duration: 1.5 + Math.random() * 2,
-      size: 2 + Math.random() * 4,
-    }));
-  }, [theme]);
-
   // Glitch scan lines
   const glitchLines = useMemo(() => {
     if (theme !== "glitch") return [];
@@ -66,29 +53,6 @@ export default function PostThemeLayer({ theme }) {
     );
   }
 
-  if (theme === "burning") {
-    return (
-      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
-        {/* Ember particles */}
-        {embers.map((e) => (
-          <div
-            key={e.id}
-            className="absolute rounded-full"
-            style={{
-              left: `${e.x}%`,
-              top: `${e.startY}%`,
-              width: `${e.size}px`,
-              height: `${e.size}px`,
-              background: `radial-gradient(circle, #ffdd00 0%, #ff6600 60%, transparent 100%)`,
-              animation: `ember-rise ${e.duration}s ${e.delay}s ease-out infinite`,
-              filter: "blur(0.5px)",
-            }}
-          />
-        ))}
-      </div>
-    );
-  }
-
   if (theme === "glitch") {
     return (
       <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
@@ -104,24 +68,6 @@ export default function PostThemeLayer({ theme }) {
             }}
           />
         ))}
-      </div>
-    );
-  }
-
-  if (theme === "liquid") {
-    return (
-      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-        <div className="liquid-blob liquid-blob-1" />
-        <div className="liquid-blob liquid-blob-2" />
-        <div className="liquid-blob liquid-blob-3" />
-      </div>
-    );
-  }
-
-  if (theme === "hologram") {
-    return (
-      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-        <div className="hologram-shimmer" />
       </div>
     );
   }

@@ -51,8 +51,7 @@ router.post(
     try {
       const { title, content, tags, author, authorColor, room, sessionId, theme } = req.body;
       const VALID_THEMES = [
-        "default","ocean","sunset","forest","midnight","rose","aurora",
-        "burning","starfield","neon-sign","liquid","hologram","glitch","polaroid","ink"
+        "default", "starfield", "glitch", "polaroid"
       ];
       const post = await Post.create({
         title: clean(title),
