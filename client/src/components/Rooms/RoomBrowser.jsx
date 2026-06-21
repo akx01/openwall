@@ -37,8 +37,8 @@ export default function RoomBrowser({ onClose }) {
     }
     try {
       await axios.post(`${API}/rooms/${room.name}/verify`, { password: pw });
-      markVerified(room.name);
-      openRoom(room);
+      markVerified(room.name, pw);
+      openRoom(room, pw);
       onClose?.();
     } catch {
       setError({ ...error, [room.name]: "Wrong password" });

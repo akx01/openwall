@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Message = require("../models/Message");
+const Room = require("../models/Room");
+const bcrypt = require("bcryptjs");
 const { messageLimiter } = require("../middleware/rateLimiter");
 const { sanitizeBody } = require("../middleware/sanitize");
 const { clean } = require("../middleware/profanityFilter");
@@ -8,8 +10,21 @@ const { clean } = require("../middleware/profanityFilter");
 // ── GET /api/messages/:room — load last 50 messages for a room
 router.get("/:room", async (req, res) => {
   try {
+    const roomName = req.params.room;
+    const roomDoc = await Room.findOne({ name: roomName });
+    if (roomDoc && roomDoc.isPrivate) {
+      const pw = req.headers["x-room-password"];
+      if (!pw) {
+        return res.status(401).json({ error: "Password required for this channel" });
+      }
+      const valid = await bcrypt.compare(pw, roomDoc.password);
+      if (!valid) {
+        return res.status(401).json({ error: "Invalid password" });
+      }
+    }
+
     const messages = await Message.find({
-      room: req.params.room,
+      room: roomName,
       deleted: false,
     })
       .sort({ createdAt: -1 })

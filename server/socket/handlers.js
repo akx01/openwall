@@ -1,6 +1,7 @@
 const Message = require("../models/Message");
 const Room = require("../models/Room");
 const Notepad = require("../models/Notepad");
+const bcrypt = require("bcryptjs");
 const { clean } = require("../middleware/profanityFilter");
 const { sanitizeString } = require("../middleware/sanitize");
 const roomManager = require("./roomManager");
@@ -13,11 +14,24 @@ exports.initSocketHandlers = (io) => {
     console.log("Connected:", socket.id);
 
     // ── JOIN ROOM ─────────────────────────────
-    socket.on("join_room", async ({ room, username, color, sessionId }) => {
+    socket.on("join_room", async ({ room, username, color, sessionId, password }) => {
       const roomDoc = await Room.findOne({ name: room });
-      if (roomDoc && roomDoc.bannedUsers.includes(username)) {
-        socket.emit("banned_from_room", { room });
-        return;
+      if (roomDoc) {
+        if (roomDoc.bannedUsers.includes(username)) {
+          socket.emit("banned_from_room", { room });
+          return;
+        }
+        if (roomDoc.isPrivate) {
+          if (!password) {
+            socket.emit("kicked_from_room", { room });
+            return;
+          }
+          const valid = await bcrypt.compare(password, roomDoc.password);
+          if (!valid) {
+            socket.emit("kicked_from_room", { room });
+            return;
+          }
+        }
       }
 
       socket.join(room);
@@ -47,6 +61,11 @@ exports.initSocketHandlers = (io) => {
 
     // ── SEND MESSAGE ──────────────────────────
     socket.on("send_message", async ({ room, content, author, authorColor, sessionId }) => {
+      // Security check: ensure socket is actually joined to the room
+      if (!socket.rooms.has(room)) {
+        return;
+      }
+
       const clean_content = clean(sanitizeString(content));
       if (!clean_content || clean_content.length > 1000) return;
 

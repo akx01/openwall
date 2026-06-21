@@ -75,7 +75,7 @@ function getRoomTheme(roomName) {
 }
 
 export default function RoomOverlay() {
-  const { activeRoom, closeRoom, roomMembers, setRoomMembers } = useRoomStore();
+  const { activeRoom, closeRoom, roomMembers, setRoomMembers, verifiedRoomPasswords } = useRoomStore();
   const { messages, typingUsers, loadMessages } = useChatStore();
   const { username, color, sessionId, pinnedRooms, pinRoom, unpinRoom } = useUserStore();
   const [input, setInput] = useState("");
@@ -92,9 +92,10 @@ export default function RoomOverlay() {
 
   useEffect(() => {
     if (!activeRoom) return;
-    loadMessages(activeRoom.name);
+    const password = verifiedRoomPasswords[activeRoom.name];
+    loadMessages(activeRoom.name, password);
     if (!socket.connected) socket.connect();
-    socket.emit("join_room", { room: activeRoom.name, username, color, sessionId });
+    socket.emit("join_room", { room: activeRoom.name, username, color, sessionId, password });
     socket.on("room_info", ({ members }) => setRoomMembers(members));
     socket.on("kicked_from_room", ({ room }) => {
       if (room === activeRoom.name) { closeRoom(); }

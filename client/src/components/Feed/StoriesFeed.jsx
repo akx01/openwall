@@ -167,7 +167,7 @@ export default function StoriesFeed() {
             >
               {/* Ring Indicator */}
               <div className="relative p-0.5 rounded-full bg-gradient-to-tr from-brand via-brand-light to-yellow-400 animate-glow-pulse group-hover:scale-105 active:scale-95 transition-all">
-                <div className="w-15 h-15 rounded-full border-2 border-white dark:border-navy-900 overflow-hidden bg-gray-100 flex items-center justify-center">
+                <div className="w-14 h-14 rounded-full border-2 border-white dark:border-navy-900 overflow-hidden bg-gray-100 flex items-center justify-center">
                   <div
                     className="w-full h-full flex items-center justify-center font-bold text-white text-base select-none"
                     style={{ background: group.authorColor || "#EF4444" }}

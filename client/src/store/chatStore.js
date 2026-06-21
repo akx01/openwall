@@ -18,8 +18,9 @@ export const useChatStore = create((set, get) => ({
     set({ rooms: data });
   },
 
-  loadMessages: async (room) => {
-    const { data } = await axios.get(`${API}/messages/${room}`);
+  loadMessages: async (room, password) => {
+    const headers = password ? { "x-room-password": password } : {};
+    const { data } = await axios.get(`${API}/messages/${room}`, { headers });
     set({ messages: data });
   },
 
@@ -47,8 +48,8 @@ export const useChatStore = create((set, get) => ({
         : s.typingUsers.filter((u) => u !== username),
     })),
 
-  createRoom: async (name, description, createdBy) => {
-    const { data } = await axios.post(`${API}/rooms`, { name, description, createdBy });
+  createRoom: async (name, description, createdBy, isPrivate, password) => {
+    const { data } = await axios.post(`${API}/rooms`, { name, description, createdBy, isPrivate, password });
     set((s) => ({ rooms: [...s.rooms, data] }));
     return data;
   },

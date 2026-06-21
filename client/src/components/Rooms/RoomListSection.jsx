@@ -30,7 +30,7 @@ export default function RoomListSection() {
       await axios.post(`${API}/rooms/${room.name}/verify`, { password: pw });
       setError({ ...error, [room.name]: null });
       setPasswordInput({ ...passwordInput, [room.name]: "" });
-      openRoom(room);
+      openRoom(room, pw);
     } catch {
       setError({ ...error, [room.name]: "Wrong password" });
     } finally {
