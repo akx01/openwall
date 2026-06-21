@@ -43,45 +43,63 @@ function LivePreview({ title, content, theme, username, color }) {
 
   return (
     <div className="mt-3 space-y-1">
-      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Live Preview · 4:3</p>
+      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Live Preview · Aspect 4:5</p>
       <div
-        className={`${t.css} post-43-ratio rounded-2xl overflow-hidden shadow-lg border border-transparent`}
+        className={`${t.css} relative w-full aspect-[4/5] rounded-[2rem] overflow-hidden shadow-lg border border-transparent`}
         style={fontStyle}
       >
         {/* Dynamic theme layer */}
         <PostThemeLayer theme={theme} />
 
-        <div className="post-inner" style={{ ...fontStyle, textAlign: isCentered ? "center" : "left" }}>
-          {/* Author stub */}
-          <div className={`flex items-center gap-2 mb-2 ${isCentered ? "justify-center" : ""}`}>
+        {/* Ambient gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/40 pointer-events-none z-10" />
+
+        {/* Top Capsule Theme Badge */}
+        <div className="absolute top-4 left-4 z-20 flex items-center gap-1 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm">
+          <span>{t.icon}</span>
+          <span>{t.label}</span>
+        </div>
+
+        {/* Main card body container */}
+        <div className="absolute inset-0 p-5 flex flex-col justify-between z-10" style={{ ...fontStyle, textAlign: isCentered ? "center" : "left" }}>
+          
+          {/* Top spacer */}
+          <div className="h-10" />
+
+          {/* Content area: Title + Body */}
+          <div className="flex-1 flex flex-col justify-center pr-12 overflow-y-auto no-scrollbar py-2">
+            <h3 className="font-bold text-lg mb-2 leading-snug post-title" style={fontStyle}>
+              {title || "Your title here..."}
+            </h3>
+            <p className="text-xs leading-relaxed post-body opacity-90" style={{ ...fontStyle, whiteSpace: "pre-wrap" }}>
+              {content || "Your content will appear here with the selected theme applied."}
+            </p>
+          </div>
+
+          {/* Bottom Profile Row */}
+          <div className="flex items-center gap-2 pr-12">
             <div
-              className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white shrink-0"
+              className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
               style={{ background: color }}
             >
               {username?.[0]?.toUpperCase() || "?"}
             </div>
-            <span className={`text-[10px] font-semibold post-title`}>
-              {username || "You"}
-            </span>
-            {isCentered && <span className="ml-1 text-sm">{t.icon}</span>}
+            <div className="min-w-0 flex-1 text-left">
+              <p className="font-bold text-xs text-white truncate post-title">
+                {username || "You"}
+              </p>
+            </div>
           </div>
 
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto no-scrollbar">
-            <h3 className="font-bold text-base mb-1.5 leading-snug post-title" style={fontStyle}>
-              {title || "Your title here..."}
-            </h3>
-            <p className="text-sm leading-relaxed post-body opacity-90" style={{ ...fontStyle, whiteSpace: "pre-wrap" }}>
-              {content || "Your content will appear here with the selected theme applied. Choose a template that matches your vibe!"}
-            </p>
-          </div>
-
-          <div className="mt-2 pt-2 post-divider border-t border-white/10 flex items-center gap-3 text-xs post-meta">
-            <span>🤍 0</span>
-            <span>💬 0</span>
-            <span className="ml-auto opacity-50">{t.icon} {t.label}</span>
-          </div>
         </div>
+
+        {/* Floating Action Sidebar Stub */}
+        <div className="absolute right-3 bottom-5 flex flex-col items-center gap-3 z-20">
+          <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs flex items-center justify-center opacity-65">🤍</div>
+          <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs flex items-center justify-center opacity-65">💬</div>
+          <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs flex items-center justify-center opacity-65">😊</div>
+        </div>
+
       </div>
     </div>
   );

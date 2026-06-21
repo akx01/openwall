@@ -31,10 +31,10 @@ export default function PostCard({ post, index = 0 }) {
   const isStyled = post.theme && post.theme !== "default";
   const isCentered = postTheme.align === "center";
 
-  const handleCopy = async (e) => {
+  const handleCopy = (e) => {
     e.stopPropagation();
     setCopying(true);
-    await copyToClipboard(`${post.title}\n\n${post.content}`);
+    copyToClipboard(`${post.title}\n\n${post.content}`);
     showToast("Copied to clipboard!", "success");
     setTimeout(() => setCopying(false), 1500);
   };
@@ -72,159 +72,166 @@ export default function PostCard({ post, index = 0 }) {
   return (
     <div
       onClick={() => openModal("postDetail", post)}
-      className={`group/card ${postTheme.css} ${isPremium ? "post-43-ratio" : ""} rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 animate-slide-up ${staggerClass} ${
+      className={`group/card relative w-full max-w-lg aspect-[4/5] md:aspect-[3/4] rounded-[2.5rem] overflow-hidden cursor-pointer transition-all duration-500 animate-slide-up ${staggerClass} ${postTheme.css} ${
         !isStyled
-          ? "border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-card-hover dark:hover:shadow-dark-card-hover"
-          : isPremium
-          ? "hover:-translate-y-1 hover:scale-[1.01]"
-          : "border border-transparent shadow-md hover:shadow-xl hover:-translate-y-1"
+          ? "bg-gradient-to-br from-gray-900 via-gray-950 to-navy-950 text-white border border-white/10 shadow-2xl hover:border-white/20"
+          : "text-white shadow-2xl"
       }`}
     >
       {/* Dynamic theme layer (stars, glitch lines, etc.) */}
       {isPremium && <PostThemeLayer theme={post.theme} />}
 
-      {/* Content wrapper */}
-      <div
-        className={isPremium ? "post-inner" : "p-4"}
-        data-title={post.title}
-        style={{ ...fontStyle, ...textAlign }}
-      >
-        {/* Author row */}
-        <div className={`flex items-center gap-2 mb-3 ${isCentered ? "justify-center" : ""}`}>
-          <Avatar username={post.author} color={post.authorColor} size="sm" />
-          <div className={isCentered ? "text-center" : "flex-1 min-w-0"}>
-            <p className={`text-sm font-semibold post-title truncate ${isStyled ? "" : "text-gray-800 dark:text-gray-100"}`}>
-              {post.author}
-            </p>
-            <p className={`text-[11px] post-meta ${isStyled ? "" : "text-gray-400"}`}>
-              {timeAgo(post.createdAt)}
-            </p>
-          </div>
-          {isStyled && !isCentered && (
-            <span className="text-sm shrink-0 ml-auto" title={postTheme.label}>{postTheme.icon}</span>
-          )}
+      {/* Ambient gradient overlay for text readability at the bottom */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/40 pointer-events-none z-10" />
+
+      {/* Top Capsule Theme Badge */}
+      {isStyled && (
+        <div className="absolute top-5 left-5 z-20 flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
+          <span>{postTheme.icon}</span>
+          <span>{postTheme.label}</span>
         </div>
+      )}
 
-        {/* Theme icon for centered layouts */}
-        {isStyled && isCentered && (
-          <div className="text-xl mb-1 opacity-70">{postTheme.icon}</div>
-        )}
+      {/* Quick react emoji bar (floats next to React button) */}
+      {showReactBar && (
+        <div className="absolute right-20 bottom-44 bg-black/85 backdrop-blur-lg border border-white/10 rounded-2xl p-2 flex gap-2 z-30 animate-scale-in shadow-xl" onClick={(e) => e.stopPropagation()}>
+          {QUICK_REACTS.map((emoji) => (
+            <button
+              key={emoji}
+              onClick={(e) => handleQuickReact(e, emoji)}
+              className="text-lg hover:scale-125 transition-transform active:scale-95"
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+      )}
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto no-scrollbar">
+      {/* Main card body container */}
+      <div className="absolute inset-0 p-6 flex flex-col justify-between z-10" style={fontStyle}>
+        
+        {/* Top spacer (pushes content down) */}
+        <div className="h-12" />
+
+        {/* Content area: Title + Body */}
+        <div className="flex-1 flex flex-col justify-center pr-16 overflow-y-auto no-scrollbar py-4" style={textAlign}>
           <h3
-            className={`font-bold mb-3 leading-snug post-title ${
-              isStyled ? "" : "text-gray-900 dark:text-gray-50"
-            } ${isPremium ? "text-xl md:text-2xl" : "text-lg md:text-xl line-clamp-2"}`}
+            className={`font-black tracking-tight mb-3 leading-tight post-title ${
+              isPremium ? "text-2xl md:text-3xl" : "text-xl md:text-2xl"
+            }`}
             style={fontStyle}
           >
             {post.title}
           </h3>
           <p
-            className={`leading-relaxed post-body ${
-              isStyled ? "" : "text-gray-600 dark:text-gray-300"
-            } ${isPremium ? "text-base md:text-lg line-clamp-[10]" : "text-sm md:text-base"}`}
+            className={`leading-relaxed post-body opacity-90 ${
+              isPremium ? "text-base md:text-lg" : "text-sm md:text-base"
+            }`}
             style={{ ...fontStyle, whiteSpace: "pre-wrap" }}
           >
             {post.content}
           </p>
         </div>
 
-        {/* Tags */}
-        {post.tags?.length > 0 && (
-          <div className={`flex flex-wrap gap-1 mt-3 ${isCentered ? "justify-center" : ""}`}>
-            {post.tags.map((tag) => (
-              <span
-                key={tag}
-                className={`post-tag text-[11px] px-2 py-0.5 rounded-full font-medium ${
-                  isStyled ? "" : "bg-brand/8 dark:bg-brand/15 text-brand dark:text-brand-light"
-                }`}
-              >
-                #{tag}
-              </span>
-            ))}
+        {/* Bottom Profile Row */}
+        <div className="flex items-center gap-3 pr-16">
+          <div className="relative shrink-0">
+            {/* Glowing avatar ring */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-brand to-pink-500 blur-sm opacity-70 animate-pulse" />
+            <div className="relative">
+              <Avatar username={post.author} color={post.authorColor} size="md" />
+            </div>
           </div>
-        )}
-
-        {/* Quick react summary */}
-        {Object.keys(localReacts).length > 0 && (
-          <div className={`flex flex-wrap gap-1 mt-2 ${isCentered ? "justify-center" : ""}`}>
-            {Object.entries(localReacts).map(([emoji, count]) =>
-              count > 0 ? (
-                <span
-                  key={emoji}
-                  className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 transition-all ${
-                    reactingEmoji === emoji ? "scale-125" : ""
-                  } ${
-                    isStyled ? "bg-white/15 text-white" : "bg-gray-100 dark:bg-white/8 text-gray-700 dark:text-gray-300"
-                  }`}
-                >
-                  {emoji} {count}
-                </span>
-              ) : null
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <p className="font-bold text-sm text-white truncate post-title">
+                {post.author}
+              </p>
+              <span className="text-[10px] text-white/50">•</span>
+              <p className="text-[10px] text-white/50 truncate post-meta">
+                {timeAgo(post.createdAt)}
+              </p>
+            </div>
+            {/* Tags row */}
+            {post.tags?.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {post.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-[10px] font-medium text-brand-light hover:underline"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
-        )}
-
-        {/* Actions row */}
-        <div className={`flex items-center justify-between mt-3 pt-3 post-divider ${
-          isStyled ? "border-t border-white/10" : "border-t border-gray-100 dark:border-white/5"
-        }`}>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleLike}
-              className={`flex items-center gap-1 text-sm transition-all active:scale-90 ${
-                liked ? "text-red-500" : isStyled ? "text-white/60 hover:text-red-400" : "text-gray-400 hover:text-red-400"
-              }`}
-            >
-              {liked ? "❤️" : "🤍"} <span className="text-xs font-semibold">{post.likes}</span>
-            </button>
-            <span className={`flex items-center gap-1 text-xs ${isStyled ? "text-white/50" : "text-gray-400"}`}>
-              💬 {post.comments?.length || 0}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={(e) => { e.stopPropagation(); setShowReactBar(v => !v); }}
-              className={`text-sm px-2 py-1 rounded-lg transition ${
-                showReactBar ? "bg-brand/10 text-brand" :
-                isStyled ? "text-white/50 hover:bg-white/10 hover:text-white" :
-                "text-gray-400 hover:bg-gray-100 dark:hover:bg-white/8 hover:text-brand"
-              }`}
-              title="React"
-            >😊</button>
-            <button
-              onClick={handleCopy}
-              className={`text-xs px-2 py-1 rounded-lg transition ${
-                isStyled ? "text-white/50 hover:bg-white/10 hover:text-white" :
-                "bg-gray-100 dark:bg-white/8 text-gray-500 dark:text-gray-400 hover:bg-brand/10 hover:text-brand"
-              }`}
-            >{copying ? "✓" : "📋"}</button>
-            <button
-              onClick={handleReport}
-              className={`text-xs transition opacity-0 group-hover/card:opacity-100 px-1 rounded hover:text-red-400 ${
-                isStyled ? "text-white/30" : "text-gray-300"
-              }`}
-              title="Report"
-            >🚩</button>
-          </div>
         </div>
 
-        {/* Quick react emoji bar */}
-        <div className={`react-bar mt-2 ${showReactBar ? "show" : ""} ${isCentered ? "justify-center" : ""}`}>
-          {QUICK_REACTS.map((emoji) => (
-            <button
-              key={emoji}
-              onClick={(e) => handleQuickReact(e, emoji)}
-              className={`react-btn ${reactingEmoji === emoji ? "scale-125" : ""}`}
-              title={emoji}
-            >
-              {emoji}
-            </button>
-          ))}
-        </div>
       </div>
+
+      {/* Floating Action Sidebar (Right-aligned) */}
+      <div className="absolute right-4 bottom-6 flex flex-col items-center gap-4 z-20" onClick={(e) => e.stopPropagation()}>
+        {/* Like */}
+        <div className="flex flex-col items-center">
+          <button
+            onClick={handleLike}
+            className={`w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-90 border ${
+              liked
+                ? "bg-red-500/20 border-red-500 text-red-500"
+                : "bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20"
+            }`}
+          >
+            {liked ? "❤️" : "🤍"}
+          </button>
+          <span className="text-[10px] font-bold text-white/70 mt-1 shadow-sm">{post.likes}</span>
+        </div>
+
+        {/* Comment */}
+        <div className="flex flex-col items-center">
+          <button
+            onClick={() => openModal("postDetail", post)}
+            className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-white/20 hover:scale-105 active:scale-95 transition-all shadow-lg"
+          >
+            💬
+          </button>
+          <span className="text-[10px] font-bold text-white/70 mt-1 shadow-sm">{post.comments?.length || 0}</span>
+        </div>
+
+        {/* Quick React Emoji Trigger */}
+        <div className="flex flex-col items-center">
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowReactBar(v => !v); }}
+            className={`w-11 h-11 rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg border ${
+              showReactBar
+                ? "bg-brand/20 border-brand text-brand"
+                : "bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20"
+            }`}
+          >
+            😊
+          </button>
+          <span className="text-[10px] font-bold text-white/70 mt-1 shadow-sm">React</span>
+        </div>
+
+        {/* Copy */}
+        <button
+          onClick={handleCopy}
+          className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-white/20 hover:scale-105 active:scale-95 transition-all shadow-lg"
+          title="Copy content"
+        >
+          {copying ? "✓" : "📋"}
+        </button>
+
+        {/* Report */}
+        <button
+          onClick={handleReport}
+          className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/60 flex items-center justify-center hover:bg-red-500/20 hover:border-red-500 hover:text-red-500 hover:scale-105 active:scale-95 transition-all shadow-lg"
+          title="Report post"
+        >
+          🚩
+        </button>
+      </div>
+
     </div>
   );
 }

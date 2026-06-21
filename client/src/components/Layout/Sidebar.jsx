@@ -2,6 +2,7 @@ import RoomList from "../Chat/RoomList";
 import { useUserStore } from "../../store/userStore";
 import { useChatStore } from "../../store/chatStore";
 import Avatar from "../UI/Avatar";
+import OpenwallLogo from "../UI/OpenwallLogo";
 
 export default function Sidebar() {
   const { username, color, darkMode, toggleDarkMode } = useUserStore();
@@ -11,8 +12,11 @@ export default function Sidebar() {
     <div className="w-56 flex-shrink-0 border-r border-gray-100 dark:border-gray-800 flex flex-col bg-white dark:bg-gray-900 h-full">
       {/* Brand */}
       <div className="p-4 border-b border-gray-100 dark:border-gray-800">
-        <h1 className="text-xl font-bold text-brand">OpenWall</h1>
-        <p className="text-xs text-gray-400 mt-0.5">
+        <div className="flex items-center gap-2 mb-1">
+          <OpenwallLogo className="w-6 h-6 text-brand" />
+          <h1 className="text-xl font-bold text-brand" style={{ fontFamily: "Outfit, sans-serif" }}>Openwall</h1>
+        </div>
+        <p className="text-xs text-gray-400">
           🟢 {onlineCount} online
         </p>
       </div>

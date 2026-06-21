@@ -17,6 +17,7 @@ import GEditNotepad from "./components/Notepad/GEditNotepad";
 import Avatar from "./components/UI/Avatar";
 import OnlinePresence from "./components/UI/OnlinePresence";
 import EmojiReactionBurst from "./components/UI/EmojiReactionBurst";
+import OpenwallLogo from "./components/UI/OpenwallLogo";
 
 // ─── Animated Theme Toggle ───────────────────
 function ThemeToggle({ darkMode, onToggle }) {
@@ -87,11 +88,11 @@ function AuthGate({ onSuccess }) {
         <div className="p-8">
           {/* Logo */}
           <div className="text-center mb-7">
-            <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center shadow-lg shadow-violet-500/30 animate-float">
-              <span className="text-3xl">✏️</span>
+            <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center shadow-lg shadow-violet-500/30 animate-float text-white">
+              <OpenwallLogo className="w-10 h-10" glow={false} />
             </div>
-            <h1 className="text-3xl font-black text-brand tracking-tight" style={{ fontFamily: "Outfit, sans-serif" }}>
-              OpenWall
+            <h1 className="text-3xl font-black text-brand tracking-tight animate-pulse" style={{ fontFamily: "Outfit, sans-serif" }}>
+              Openwall
             </h1>
             <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">
               Anonymous public writing & real-time chat
@@ -271,10 +272,12 @@ export default function App() {
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={() => setMobileTab("home")}
-            className="text-2xl font-black text-brand tracking-tight"
-            style={{ fontFamily: "Outfit, sans-serif" }}
+            className="flex items-center gap-2 group"
           >
-            OpenWall
+            <OpenwallLogo className="w-8 h-8 text-brand group-hover:scale-110 transition-transform" />
+            <span className="text-2xl font-black text-brand tracking-tight" style={{ fontFamily: "Outfit, sans-serif" }}>
+              Openwall
+            </span>
           </button>
           <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-500/20">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
