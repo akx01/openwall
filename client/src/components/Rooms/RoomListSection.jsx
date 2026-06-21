@@ -9,26 +9,32 @@ const API = import.meta.env.VITE_API_URL || "/api";
 
 export default function RoomListSection() {
   const { rooms, loadRooms } = useChatStore();
-  const { openRoom, markVerified, isVerified, activeRoom } = useRoomStore();
+  const { openRoom, activeRoom } = useRoomStore();
   const { username, pinnedRooms, pinRoom, unpinRoom } = useUserStore();
   const [showCreate, setShowCreate] = useState(false);
   const [passwordInput, setPasswordInput] = useState({});
   const [error, setError] = useState({});
   const [search, setSearch] = useState("");
+  const [unlocking, setUnlocking] = useState({});
 
   useEffect(() => { loadRooms(); }, []);
 
   const handleJoin = async (room) => {
-    if (!room.isPrivate || isVerified(room.name)) { openRoom(room); return; }
+    // Public rooms: join directly
+    if (!room.isPrivate) { openRoom(room); return; }
+    // Private rooms: ALWAYS require password
     const pw = passwordInput[room.name] || "";
     if (!pw) { setError({ ...error, [room.name]: "Password required" }); return; }
+    setUnlocking({ ...unlocking, [room.name]: true });
     try {
       await axios.post(`${API}/rooms/${room.name}/verify`, { password: pw });
-      markVerified(room.name);
       setError({ ...error, [room.name]: null });
+      setPasswordInput({ ...passwordInput, [room.name]: "" });
       openRoom(room);
     } catch {
       setError({ ...error, [room.name]: "Wrong password" });
+    } finally {
+      setUnlocking({ ...unlocking, [room.name]: false });
     }
   };
 
@@ -46,7 +52,6 @@ export default function RoomListSection() {
 
   const renderRoomCard = (room, i) => {
     const isPinned = pinnedRooms.includes(room.name);
-    const isUnlocked = !room.isPrivate || isVerified(room.name);
     const isActive = activeRoom?.name === room.name;
 
     return (
@@ -64,13 +69,11 @@ export default function RoomListSection() {
             <div
               className={`w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold shrink-0 shadow-sm ${
                 room.isPrivate
-                  ? isUnlocked
-                    ? "bg-amber-500/15 text-amber-500"
-                    : "bg-amber-500 text-white"
+                  ? "bg-amber-500/15 text-amber-500"
                   : "bg-brand/12 text-brand dark:bg-brand/25 dark:text-brand-light"
               }`}
             >
-              {room.isPrivate ? (isUnlocked ? "🔓" : "🔒") : "#"}
+              {room.isPrivate ? "🔒" : "#"}
             </div>
             <div className="truncate">
               <h3 className="font-bold text-sm text-gray-900 dark:text-gray-50 truncate leading-snug">
@@ -101,13 +104,13 @@ export default function RoomListSection() {
           {room.description || (room.isPrivate ? "🔒 Private channel" : "No description yet.")}
         </p>
 
-        {/* Password input or join link */}
-        {room.isPrivate && !isVerified(room.name) ? (
+        {/* Password input for ALL private rooms — always shown */}
+        {room.isPrivate ? (
           <div className="space-y-1.5" onClick={(e) => e.stopPropagation()}>
             <div className="flex gap-1.5">
               <input
                 type="password"
-                placeholder="Enter password"
+                placeholder="Enter room password"
                 value={passwordInput[room.name] || ""}
                 onChange={(e) => setPasswordInput({ ...passwordInput, [room.name]: e.target.value })}
                 onKeyDown={(e) => e.key === "Enter" && handleJoin(room)}
@@ -115,9 +118,10 @@ export default function RoomListSection() {
               />
               <button
                 onClick={() => handleJoin(room)}
-                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-[10px] font-bold transition active:scale-95 shadow-sm"
+                disabled={unlocking[room.name]}
+                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-[10px] font-bold transition active:scale-95 shadow-sm disabled:opacity-60"
               >
-                Unlock
+                {unlocking[room.name] ? "..." : "Unlock"}
               </button>
             </div>
             {error[room.name] && (

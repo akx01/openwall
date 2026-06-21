@@ -1,4 +1,4 @@
-// Post themes — each has a CSS class, a label, a preview gradient, and a text-safe flag
+// Post themes — each has a CSS class, label, preview gradient, icon, font override, and text alignment
 export const POST_THEMES = [
   {
     id: "default",
@@ -7,6 +7,8 @@ export const POST_THEMES = [
     preview: "bg-white dark:bg-navy-700",
     dark: false,
     icon: "⬜",
+    font: null,
+    align: "left",
   },
   {
     id: "ocean",
@@ -15,6 +17,8 @@ export const POST_THEMES = [
     preview: "bg-gradient-to-br from-[#0f2027] via-[#203a43] to-[#2c5364]",
     dark: true,
     icon: "🌊",
+    font: null,
+    align: "left",
   },
   {
     id: "sunset",
@@ -23,6 +27,8 @@ export const POST_THEMES = [
     preview: "bg-gradient-to-br from-[#f7971e] via-[#ffd200] to-[#ff512f]",
     dark: false,
     icon: "🌅",
+    font: null,
+    align: "left",
   },
   {
     id: "forest",
@@ -31,6 +37,8 @@ export const POST_THEMES = [
     preview: "bg-gradient-to-br from-[#134e5e] to-[#71b280]",
     dark: true,
     icon: "🌿",
+    font: null,
+    align: "left",
   },
   {
     id: "midnight",
@@ -39,6 +47,8 @@ export const POST_THEMES = [
     preview: "bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e]",
     dark: true,
     icon: "🌙",
+    font: null,
+    align: "left",
   },
   {
     id: "rose",
@@ -47,6 +57,8 @@ export const POST_THEMES = [
     preview: "bg-gradient-to-br from-[#f953c6] to-[#b91d73]",
     dark: true,
     icon: "🌸",
+    font: null,
+    align: "left",
   },
   {
     id: "aurora",
@@ -55,6 +67,64 @@ export const POST_THEMES = [
     preview: "bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]",
     dark: true,
     icon: "🔮",
+    font: null,
+    align: "left",
+  },
+  // ─── New Rich Templates ───────────────────────────────────────────
+  {
+    id: "shayari",
+    label: "Shayari",
+    css: "post-theme-shayari",
+    preview: "bg-gradient-to-br from-[#c9a96e] via-[#e8d5a3] to-[#b8860b]",
+    dark: false,
+    icon: "📜",
+    font: "'Dancing Script', cursive",
+    align: "center",
+    description: "Torn & burnt paper with ink poetry feel",
+  },
+  {
+    id: "neon",
+    label: "Neon",
+    css: "post-theme-neon",
+    preview: "bg-gradient-to-br from-[#0d0d0d] via-[#1a0030] to-[#000d1a]",
+    dark: true,
+    icon: "🌆",
+    font: null,
+    align: "left",
+    description: "Cyberpunk neon glow on dark background",
+  },
+  {
+    id: "cosmic",
+    label: "Cosmic",
+    css: "post-theme-cosmic",
+    preview: "bg-gradient-to-br from-[#000428] via-[#004e92] to-[#2c0059]",
+    dark: true,
+    icon: "🌌",
+    font: null,
+    align: "left",
+    description: "Deep space nebula with stardust",
+  },
+  {
+    id: "vintage",
+    label: "Vintage",
+    css: "post-theme-vintage",
+    preview: "bg-gradient-to-br from-[#f5e6c8] via-[#e8d5a3] to-[#d4b483]",
+    dark: false,
+    icon: "📷",
+    font: "'Playfair Display', serif",
+    align: "left",
+    description: "Aged paper with vignette frame",
+  },
+  {
+    id: "minimal",
+    label: "Minimal",
+    css: "post-theme-minimal",
+    preview: "bg-white border-2 border-black",
+    dark: false,
+    icon: "◻️",
+    font: "'Inter', sans-serif",
+    align: "left",
+    description: "Editorial bold black & white",
   },
 ];
 

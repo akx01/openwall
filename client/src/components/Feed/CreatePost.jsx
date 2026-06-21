@@ -10,6 +10,9 @@ const API = import.meta.env.VITE_API_URL || "/api";
 const MAX_CONTENT = 2000;
 const MAX_TITLE = 120;
 
+// Themes that use Instagram-style square ratio (show wider live preview)
+const INSTAGRAM_THEMES = new Set(["shayari", "neon", "cosmic", "vintage", "minimal"]);
+
 // Character count ring SVG
 function CharRing({ value, max, size = 24 }) {
   const pct = Math.min(value / max, 1);
@@ -40,6 +43,65 @@ function CharRing({ value, max, size = 24 }) {
   );
 }
 
+// WYSIWYG live preview of the post in the selected theme
+function LivePreview({ title, content, theme, username, color }) {
+  const t = POST_THEMES.find((x) => x.id === theme) || POST_THEMES[0];
+  const isInstagram = INSTAGRAM_THEMES.has(theme);
+  const fontStyle = t.font ? { fontFamily: t.font } : {};
+  if (theme === "default") return null;
+
+  return (
+    <div className="mt-3 space-y-1">
+      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Live Preview</p>
+      <div
+        className={`${t.css} ${isInstagram ? "aspect-square" : ""} rounded-2xl overflow-hidden border ${
+          theme === "minimal" ? "" : "border-transparent"
+        } shadow-md`}
+        style={fontStyle}
+      >
+        <div className={`p-5 relative z-10 ${isInstagram ? "h-full flex flex-col justify-center" : ""}`}>
+          {/* Author stub */}
+          <div className="flex items-center gap-2 mb-3">
+            <div
+              className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
+              style={{ background: color }}
+            >
+              {username?.[0]?.toUpperCase() || "?"}
+            </div>
+            <span className={`text-[11px] font-semibold post-title ${t.dark || isInstagram ? "opacity-80" : "text-gray-700"}`}>
+              {username || "You"}
+            </span>
+            <span className="ml-auto text-sm">{t.icon}</span>
+          </div>
+
+          {/* Title preview */}
+          <h3
+            className={`font-bold text-base mb-1.5 leading-snug post-title ${t.dark ? "" : "text-gray-900"} ${isInstagram ? "text-xl text-center" : ""}`}
+            style={fontStyle}
+          >
+            {title || "Your title will appear here..."}
+          </h3>
+
+          {/* Content preview */}
+          <p
+            className={`text-sm leading-relaxed post-body opacity-85 line-clamp-3 ${
+              t.dark ? "" : "text-gray-600"
+            } ${isInstagram ? "text-center line-clamp-4" : ""}`}
+            style={fontStyle}
+          >
+            {content || "Your content will appear here. Start typing to see a live preview of how your post will look!"}
+          </p>
+
+          {/* Shayari pen decoration */}
+          {theme === "shayari" && (
+            <div className="post-theme-deco">✒️</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function QuickCompose({ onPublished }) {
   const { username, color, sessionId } = useUserStore();
   const { addPost } = usePostStore();
@@ -50,8 +112,6 @@ export default function QuickCompose({ onPublished }) {
   const [theme, setTheme] = useState("default");
   const [loading, setLoading] = useState(false);
   const textareaRef = useRef(null);
-
-  const selectedTheme = POST_THEMES.find((t) => t.id === theme) || POST_THEMES[0];
 
   const handleOpen = () => {
     setOpen(true);
@@ -127,14 +187,6 @@ export default function QuickCompose({ onPublished }) {
       <div className={`compose-expand-area ${open ? "open" : ""}`}>
         <div className="px-4 pb-4 space-y-3">
 
-          {/* Live preview banner for themed post */}
-          {theme !== "default" && (
-            <div className={`rounded-2xl px-4 py-2 text-xs font-medium flex items-center gap-2 ${selectedTheme.preview} ${selectedTheme.dark ? "text-white/80" : "text-black/60"}`}>
-              <span>{selectedTheme.icon}</span>
-              Preview: <span className="font-bold">{selectedTheme.label}</span> theme
-            </div>
-          )}
-
           {/* Title */}
           <input
             value={form.title}
@@ -170,32 +222,43 @@ export default function QuickCompose({ onPublished }) {
 
           {/* ─── THEME PICKER ─── */}
           <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Post Theme</p>
-            <div className="flex flex-wrap gap-2">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Post Template</p>
+            <div className="grid grid-cols-6 gap-2">
               {POST_THEMES.map((t) => (
                 <button
                   key={t.id}
                   onClick={() => setTheme(t.id)}
                   title={t.label}
-                  className={`relative group flex flex-col items-center gap-1 p-0.5 rounded-xl transition-all ${
-                    theme === t.id
-                      ? "ring-2 ring-brand ring-offset-2 ring-offset-white dark:ring-offset-navy-800 scale-105"
-                      : "hover:scale-105"
+                  className={`theme-preview-card relative flex flex-col items-center gap-1 p-0.5 rounded-xl ${
+                    theme === t.id ? "selected" : ""
                   }`}
                 >
-                  <div className={`w-10 h-10 rounded-xl ${t.preview} border border-black/10 dark:border-white/10 flex items-center justify-center text-lg shadow-sm`}>
+                  <div className={`w-10 h-10 rounded-xl ${t.preview} border border-black/10 dark:border-white/10 flex items-center justify-center text-lg shadow-sm overflow-hidden relative`}>
                     {t.icon}
+                    {/* Neon glow effect for neon theme swatch */}
+                    {t.id === "neon" && (
+                      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-purple-600/20" />
+                    )}
                   </div>
-                  <span className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 leading-none">
+                  <span className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 leading-none truncate w-full text-center">
                     {t.label}
                   </span>
                   {theme === t.id && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-brand rounded-full flex items-center justify-center text-[9px] text-white font-bold">✓</span>
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-brand rounded-full flex items-center justify-center text-[9px] text-white font-bold z-10">✓</span>
                   )}
                 </button>
               ))}
             </div>
           </div>
+
+          {/* ─── WYSIWYG Live Preview ─── */}
+          <LivePreview
+            title={form.title}
+            content={form.content}
+            theme={theme}
+            username={username}
+            color={color}
+          />
 
           {/* Footer */}
           <div className="flex items-center justify-between pt-1">
