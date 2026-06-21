@@ -50,7 +50,10 @@ router.post(
 
     try {
       const { title, content, tags, author, authorColor, room, sessionId, theme } = req.body;
-      const VALID_THEMES = ["default","ocean","sunset","forest","midnight","rose","aurora"];
+      const VALID_THEMES = [
+        "default","ocean","sunset","forest","midnight","rose","aurora",
+        "burning","starfield","neon-sign","liquid","hologram","glitch","polaroid","ink"
+      ];
       const post = await Post.create({
         title: clean(title),
         content: clean(content),
@@ -163,7 +166,7 @@ router.delete("/:id", async (req, res) => {
 router.post("/:id/react", async (req, res) => {
   try {
     const { emoji, sessionId } = req.body;
-    const ALLOWED = ["👍", "❤️", "😂", "😮", "🔥"];
+    const ALLOWED = ["👍", "❤️", "😂", "😮", "🔥", "🎉", "😍"];
     if (!ALLOWED.includes(emoji)) return res.status(400).json({ error: "Invalid emoji" });
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ error: "Not found" });
