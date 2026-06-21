@@ -11,6 +11,7 @@ import QuickCompose from "./components/Feed/CreatePost";
 import SettingsPage from "./pages/SettingsPage";
 import RoomListSection from "./components/Rooms/RoomListSection";
 import RoomOverlay from "./components/Rooms/RoomOverlay";
+import CommentModal from "./components/Feed/CommentModal";
 import BottomNav from "./components/Mobile/BottomNav";
 import ToastContainer from "./components/UI/Toast";
 import GEditNotepad from "./components/Notepad/GEditNotepad";
@@ -357,6 +358,7 @@ export default function App() {
       {activeRoom && <RoomOverlay />}
       {activeModal === "createPost" && <QuickCompose onClose={closeModal} />}
       {activeModal === "postDetail" && <PostModal />}
+      {activeModal === "comments" && <CommentModal />}
       {showSettings && <SettingsPage onClose={() => setShowSettings(false)} />}
 
       {/* ─── Bottom Nav (Mobile) ─────────────────── */}

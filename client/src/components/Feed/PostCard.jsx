@@ -61,7 +61,11 @@ export default function PostCard({ post, index = 0 }) {
 
   const handleQuickReact = async (e, emoji) => {
     e.stopPropagation();
-    fireEmojiReaction(emoji, e.clientX, e.clientY);
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX || (e.touches && e.touches[0]?.clientX) || (e.changedTouches && e.changedTouches[0]?.clientX) || (rect.left + rect.width / 2);
+    const y = e.clientY || (e.touches && e.touches[0]?.clientY) || (e.changedTouches && e.changedTouches[0]?.clientY) || (rect.top + rect.height / 2);
+    
+    fireEmojiReaction(emoji, x, y);
     setReactingEmoji(emoji);
     setTimeout(() => setReactingEmoji(null), 600);
 
@@ -132,7 +136,7 @@ export default function PostCard({ post, index = 0 }) {
         <div className="h-12" />
 
         {/* Content area: Title + Body */}
-        <div className="flex-1 flex flex-col justify-center pr-16 overflow-y-auto no-scrollbar py-4" style={textAlign}>
+        <div className="flex-1 flex flex-col justify-center pr-16 overflow-hidden py-4" style={textAlign}>
           <h3
             className={`font-black tracking-tight mb-3 leading-tight post-title ${
               isPremium ? "text-2xl md:text-3xl" : "text-xl md:text-2xl"
@@ -142,7 +146,7 @@ export default function PostCard({ post, index = 0 }) {
             {post.title}
           </h3>
           <p
-            className={`leading-relaxed post-body opacity-90 ${
+            className={`leading-relaxed post-body opacity-90 line-clamp-6 md:line-clamp-none ${
               isPremium ? "text-base md:text-lg" : "text-sm md:text-base"
             }`}
             style={{ ...fontStyle, whiteSpace: "pre-wrap" }}
@@ -208,8 +212,8 @@ export default function PostCard({ post, index = 0 }) {
         {/* Comment */}
         <div className="flex flex-col items-center">
           <button
-            onClick={() => openModal("postDetail", { ...post, focusComment: true })}
-            className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-white/20 hover:scale-105 active:scale-95 transition-all shadow-lg"
+            onClick={() => openModal("comments", post)}
+            className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-white/20 hover:scale-105 active:scale-95 transition-all shadow-lg cursor-pointer"
           >
             💬
           </button>

@@ -9,7 +9,7 @@ const API = import.meta.env.VITE_API_URL || "/api";
 
 export default function RoomListSection() {
   const { rooms, loadRooms } = useChatStore();
-  const { openRoom, activeRoom } = useRoomStore();
+  const { openRoom, activeRoom, isVerified } = useRoomStore();
   const { username, pinnedRooms, pinRoom, unpinRoom } = useUserStore();
   const [showCreate, setShowCreate] = useState(false);
   const [passwordInput, setPasswordInput] = useState({});
@@ -20,8 +20,11 @@ export default function RoomListSection() {
   useEffect(() => { loadRooms(); }, []);
 
   const handleJoin = async (room) => {
-    // Public rooms: join directly
-    if (!room.isPrivate) { openRoom(room); return; }
+    // Public rooms or already verified private rooms: join directly
+    if (!room.isPrivate || isVerified(room.name)) {
+      openRoom(room);
+      return;
+    }
     // Private rooms: ALWAYS require password
     const pw = passwordInput[room.name] || "";
     if (!pw) { setError({ ...error, [room.name]: "Password required" }); return; }
@@ -105,7 +108,7 @@ export default function RoomListSection() {
         </p>
 
         {/* Password input for ALL private rooms — always shown */}
-        {room.isPrivate ? (
+        {room.isPrivate && !isVerified(room.name) ? (
           <div className="space-y-1.5" onClick={(e) => e.stopPropagation()}>
             <div className="flex gap-1.5">
               <input
@@ -114,12 +117,12 @@ export default function RoomListSection() {
                 value={passwordInput[room.name] || ""}
                 onChange={(e) => setPasswordInput({ ...passwordInput, [room.name]: e.target.value })}
                 onKeyDown={(e) => e.key === "Enter" && handleJoin(room)}
-                className="flex-1 px-3 py-1.5 text-xs bg-gray-50 dark:bg-navy-700 rounded-xl border border-gray-200 dark:border-white/8 outline-none focus:border-amber-500 transition"
+                className="flex-1 px-3 py-1.5 text-xs bg-gray-50 dark:bg-navy-700 rounded-xl border border-gray-200 dark:border-white/8 outline-none focus:border-amber-500 transition text-gray-800 dark:text-gray-150"
               />
               <button
                 onClick={() => handleJoin(room)}
                 disabled={unlocking[room.name]}
-                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-[10px] font-bold transition active:scale-95 shadow-sm disabled:opacity-60"
+                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-[10px] font-bold transition active:scale-95 shadow-sm disabled:opacity-60 cursor-pointer"
               >
                 {unlocking[room.name] ? "..." : "Unlock"}
               </button>
@@ -132,7 +135,7 @@ export default function RoomListSection() {
           <div className="flex justify-between items-center text-[11px]">
             <span className="text-gray-400">by {room.createdBy}</span>
             <span className={`font-bold transition ${isActive ? "text-green-500" : "text-brand hover:underline"}`}>
-              {isActive ? "✓ In Room" : "Join →"}
+              {isActive ? "✓ In Room" : room.isPrivate ? "🔓 Join →" : "Join →"}
             </span>
           </div>
         )}
