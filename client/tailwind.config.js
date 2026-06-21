@@ -13,18 +13,18 @@ export default {
         },
         surface: {
           DEFAULT: "#ffffff",
-          dark: "#0D0F1A",
+          dark: "#0B0B0B",
         },
         navy: {
-          900: "#0A0E1A",
-          800: "#0F1525",
-          700: "#141B30",
-          600: "#1A2340",
+          900: "#080808",
+          800: "#121212",
+          700: "#1A1A1A",
+          600: "#262626",
         },
       },
       fontFamily: {
-        sans: ["Plus Jakarta Sans", "Inter", "sans-serif"],
-        display: ["Outfit", "sans-serif"],
+        sans: ["Space Grotesk", "sans-serif"],
+        display: ["Syne", "sans-serif"],
       },
       backgroundImage: {
         "aurora-light":

@@ -6,6 +6,7 @@ import Confetti from "../UI/Confetti";
 import { usePosts } from "../../hooks/usePosts";
 import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
 import { debounce } from "../../utils/helpers";
+import { Search } from "lucide-react";
 const SORT_OPTIONS = [
   { value: "latest", label: "🕐 Latest" },
   { value: "liked", label: "❤️ Most Liked" },
@@ -41,19 +42,21 @@ export default function Feed() {
 
 
       {/* Toolbar */}
-      <div className="flex flex-wrap gap-2 items-center">
-        <div className="relative flex-1 min-w-[180px]">
-          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">🔍</span>
+      <div className="flex flex-wrap gap-3 items-center w-full max-w-2xl mx-auto">
+        <div className="relative flex-1 min-w-[200px]">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+            <Search size={16} />
+          </span>
           <input
             onChange={(e) => searchDebounced(e.target.value)}
-            placeholder="Search posts..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-gray-200 dark:border-white/8 bg-white dark:bg-navy-700/60 text-sm outline-none focus:border-brand/40 focus:ring-2 focus:ring-brand/10 transition-all text-gray-800 dark:text-gray-100 placeholder-gray-400"
+            placeholder="Search title or author..."
+            className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-white/5 bg-white dark:bg-navy-800 text-sm outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/10 transition-all text-gray-800 dark:text-gray-100 placeholder-gray-400 font-medium"
           />
         </div>
         <select
           onChange={handleSortChange}
           value={sortLabel}
-          className="px-3 py-2.5 rounded-2xl border border-gray-200 dark:border-white/8 bg-white dark:bg-navy-700/60 text-sm outline-none focus:border-brand/40 text-gray-700 dark:text-gray-200 transition-all"
+          className="px-4 py-3 rounded-xl border border-gray-200 dark:border-white/5 bg-white dark:bg-navy-800 text-sm outline-none focus:border-brand/50 text-gray-700 dark:text-gray-200 transition-all font-medium cursor-pointer"
         >
           {SORT_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>

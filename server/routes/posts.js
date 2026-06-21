@@ -14,7 +14,12 @@ router.get("/", async (req, res) => {
     const query = { hidden: false };
     if (room) query.room = room;
     if (tag) query.tags = tag;
-    if (search) query.$text = { $search: search };
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { author: { $regex: search, $options: "i" } }
+      ];
+    }
 
     let sortObj = {};
     if (sort === "liked") sortObj = { likes: -1 };

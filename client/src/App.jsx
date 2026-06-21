@@ -17,21 +17,34 @@ import GEditNotepad from "./components/Notepad/GEditNotepad";
 import Avatar from "./components/UI/Avatar";
 import OnlinePresence from "./components/UI/OnlinePresence";
 import EmojiReactionBurst from "./components/UI/EmojiReactionBurst";
-import OpenwallLogo from "./components/UI/OpenwallLogo";
+import BrandLogo from "./components/UI/BrandLogo";
+import { motion, AnimatePresence } from "framer-motion";
+import { Home, MessageSquare, FileText, Edit3, Sun, Moon } from "lucide-react";
 
 // ─── Animated Theme Toggle ───────────────────
 function ThemeToggle({ darkMode, onToggle }) {
   return (
-    <button
+    <motion.button
       onClick={onToggle}
-      className="theme-toggle-track shrink-0"
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+      className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 dark:bg-navy-800 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-white/5 shadow-sm transition-colors cursor-pointer"
       title={darkMode ? "Switch to Light" : "Switch to Dark"}
       aria-label="Toggle theme"
     >
-      <div className="theme-toggle-knob">
-        {darkMode ? "🌙" : "☀️"}
-      </div>
-    </button>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={darkMode ? "dark" : "light"}
+          initial={{ y: -10, opacity: 0, rotate: -40 }}
+          animate={{ y: 0, opacity: 1, rotate: 0 }}
+          exit={{ y: 10, opacity: 0, rotate: 40 }}
+          transition={{ duration: 0.15 }}
+          className="flex items-center justify-center"
+        >
+          {darkMode ? <Moon size={18} className="text-yellow-400" /> : <Sun size={18} className="text-orange-500" />}
+        </motion.div>
+      </AnimatePresence>
+    </motion.button>
   );
 }
 
@@ -86,15 +99,10 @@ function AuthGate({ onSuccess }) {
         <div className="h-2 bg-gradient-to-r from-violet-600 via-purple-500 to-cyan-500" />
 
         <div className="p-8">
-          {/* Logo */}
-          <div className="text-center mb-7">
-            <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center shadow-lg shadow-violet-500/30 animate-float text-white">
-              <OpenwallLogo className="w-10 h-10" glow={false} />
-            </div>
-            <h1 className="text-3xl font-black text-brand tracking-tight animate-pulse" style={{ fontFamily: "Outfit, sans-serif" }}>
-              Openwall
-            </h1>
-            <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">
+          {/* Logo & Title branding Animation */}
+          <div className="flex flex-col items-center mb-8">
+            <BrandLogo size="lg" className="scale-125 origin-center mb-2" />
+            <p className="text-gray-400 dark:text-gray-500 text-xs text-center">
               Anonymous public writing & real-time chat
             </p>
           </div>
@@ -220,23 +228,32 @@ function AuthGate({ onSuccess }) {
 // ─── Desktop Nav Link ─────────────────────────
 function NavLink({ active, onClick, children }) {
   return (
-    <button
+    <motion.button
       onClick={onClick}
-      className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all relative ${
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all relative flex items-center gap-1.5 cursor-pointer ${
         active
-          ? "bg-brand/10 dark:bg-brand/20 text-brand nav-pill-active"
-          : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5"
+          ? "text-brand"
+          : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
       }`}
     >
-      {children}
-    </button>
+      {active && (
+        <motion.div
+          layoutId="activeTabIndicatorDesktop"
+          className="absolute inset-0 bg-brand/8 dark:bg-brand/15 rounded-xl"
+          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+        />
+      )}
+      <span className="relative z-10 flex items-center gap-1.5">{children}</span>
+    </motion.button>
   );
 }
 
 // ─── Main App ─────────────────────────────────
 export default function App() {
   const { username, color, darkMode, toggleDarkMode, hasAccount } = useUserStore();
-  const { activeModal, closeModal } = useUIStore();
+  const { activeModal, closeModal, openModal } = useUIStore();
   const { loadRooms } = useChatStore();
   const { activeRoom } = useRoomStore();
 
@@ -270,14 +287,8 @@ export default function App() {
       <header className="sticky top-0 z-30 glass-effect border-b border-gray-100/80 dark:border-white/5 px-5 py-3 flex items-center justify-between gap-3">
         {/* Logo + Online badge */}
         <div className="flex items-center gap-3 shrink-0">
-          <button
-            onClick={() => setMobileTab("home")}
-            className="flex items-center gap-2 group"
-          >
-            <OpenwallLogo className="w-8 h-8 text-brand group-hover:scale-110 transition-transform" />
-            <span className="text-2xl font-black text-brand tracking-tight" style={{ fontFamily: "Outfit, sans-serif" }}>
-              Openwall
-            </span>
+          <button onClick={() => setMobileTab("home")} className="cursor-pointer">
+            <BrandLogo size="sm" />
           </button>
           <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-500/20">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
@@ -287,15 +298,23 @@ export default function App() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-1 flex-1 ml-4">
-          <NavLink active={mobileTab === "home"} onClick={() => setMobileTab("home")}>🏠 Home</NavLink>
-          <NavLink active={mobileTab === "rooms"} onClick={() => setMobileTab("rooms")}>💬 Rooms</NavLink>
-          <NavLink active={mobileTab === "notepad"} onClick={() => setMobileTab("notepad")}>📝 Notepad</NavLink>
-          <button
+          <NavLink active={mobileTab === "home"} onClick={() => setMobileTab("home")}>
+            <Home size={15} /> Home
+          </NavLink>
+          <NavLink active={mobileTab === "rooms"} onClick={() => setMobileTab("rooms")}>
+            <MessageSquare size={15} /> Rooms
+          </NavLink>
+          <NavLink active={mobileTab === "notepad"} onClick={() => setMobileTab("notepad")}>
+            <FileText size={15} /> Notepad
+          </NavLink>
+          <motion.button
             onClick={() => openModal("createPost")}
-            className="px-4 py-2 rounded-xl text-sm font-semibold transition-all text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 flex items-center gap-1.5"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="ml-2 px-4 py-2 bg-brand text-white text-sm font-bold rounded-xl hover:bg-brand-dark transition-all shadow-md shadow-brand/25 flex items-center gap-1.5 cursor-pointer"
           >
-            ✍️ Write
-          </button>
+            <Edit3 size={14} /> Write
+          </motion.button>
         </nav>
 
         {/* Right controls */}
@@ -307,15 +326,17 @@ export default function App() {
           <ThemeToggle darkMode={darkMode} onToggle={toggleDarkMode} />
 
           {/* Profile button */}
-          <button
+          <motion.button
             onClick={() => setShowSettings(true)}
-            className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-white/5 p-1.5 pr-3 rounded-2xl transition-all group"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className="flex items-center gap-2 bg-gray-50 dark:bg-navy-800 border border-gray-100 dark:border-white/5 p-1.5 pr-3.5 rounded-2xl transition-all hover:bg-gray-100 dark:hover:bg-navy-700 cursor-pointer"
           >
             <Avatar username={username} color={color} size="sm" />
-            <span className="text-sm font-bold text-gray-700 dark:text-gray-200 hidden sm:inline truncate max-w-[100px] group-hover:text-brand transition-colors">
+            <span className="text-sm font-bold text-gray-700 dark:text-gray-200 hidden sm:inline truncate max-w-[100px] hover:text-brand transition-colors">
               {username}
             </span>
-          </button>
+          </motion.button>
         </div>
       </header>
 
