@@ -33,7 +33,7 @@ router.get("/:friend", authenticateUser, async (req, res) => {
     const friendUsername = req.params.friend.toLowerCase().trim();
     
     // Check if they are friends
-    if (!req.user.friends.includes(friendUsername)) {
+    if (!(req.user.friends || []).includes(friendUsername)) {
       return res.status(403).json({ error: "You can only message your friends" });
     }
 

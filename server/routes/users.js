@@ -94,9 +94,9 @@ router.post("/sync", sanitizeBody, async (req, res) => {
 router.get("/friends", authenticateUser, async (req, res) => {
   try {
     res.json({
-      friends: req.user.friends,
-      friendRequests: req.user.friendRequests,
-      sentRequests: req.user.sentRequests,
+      friends: req.user.friends || [],
+      friendRequests: req.user.friendRequests || [],
+      sentRequests: req.user.sentRequests || [],
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to retrieve friends" });
@@ -122,9 +122,9 @@ router.get("/search", authenticateUser, async (req, res) => {
 
     // Map relationships relative to requester
     const results = users.map((u) => {
-      const isFriend = req.user.friends.includes(u.username);
-      const isPending = req.user.friendRequests.includes(u.username);
-      const isSent = req.user.sentRequests.includes(u.username);
+      const isFriend = (req.user.friends || []).includes(u.username);
+      const isPending = (req.user.friendRequests || []).includes(u.username);
+      const isSent = (req.user.sentRequests || []).includes(u.username);
       return {
         username: u.username,
         color: u.color,
@@ -155,6 +155,14 @@ router.post("/friend-request", authenticateUser, async (req, res) => {
     if (!recipientUser) {
       return res.status(404).json({ error: "User not found" });
     }
+
+    if (!req.user.friends) req.user.friends = [];
+    if (!req.user.friendRequests) req.user.friendRequests = [];
+    if (!req.user.sentRequests) req.user.sentRequests = [];
+
+    if (!recipientUser.friends) recipientUser.friends = [];
+    if (!recipientUser.friendRequests) recipientUser.friendRequests = [];
+    if (!recipientUser.sentRequests) recipientUser.sentRequests = [];
 
     // Check relationship state
     if (req.user.friends.includes(targetUsername)) {
@@ -214,6 +222,10 @@ router.post("/friend-request/accept", authenticateUser, async (req, res) => {
 
     const targetUsername = requester.toLowerCase().trim();
 
+    if (!req.user.friends) req.user.friends = [];
+    if (!req.user.friendRequests) req.user.friendRequests = [];
+    if (!req.user.sentRequests) req.user.sentRequests = [];
+
     if (!req.user.friendRequests.includes(targetUsername)) {
       return res.status(400).json({ error: "No pending friend request from this user" });
     }
@@ -222,6 +234,10 @@ router.post("/friend-request/accept", authenticateUser, async (req, res) => {
     if (!requesterUser) {
       return res.status(404).json({ error: "Requester not found" });
     }
+
+    if (!requesterUser.friends) requesterUser.friends = [];
+    if (!requesterUser.friendRequests) requesterUser.friendRequests = [];
+    if (!requesterUser.sentRequests) requesterUser.sentRequests = [];
 
     // Accept friend request
     req.user.friends.push(targetUsername);
@@ -254,6 +270,9 @@ router.post("/friend-request/decline", authenticateUser, async (req, res) => {
 
     const targetUsername = requester.toLowerCase().trim();
 
+    if (!req.user.friendRequests) req.user.friendRequests = [];
+    if (!req.user.sentRequests) req.user.sentRequests = [];
+
     // Remove from incoming requests if present
     req.user.friendRequests = req.user.friendRequests.filter((name) => name !== targetUsername);
     // Also remove from sent requests just in case user is canceling their own request
@@ -262,6 +281,8 @@ router.post("/friend-request/decline", authenticateUser, async (req, res) => {
 
     const otherUser = await User.findOne({ username: targetUsername });
     if (otherUser) {
+      if (!otherUser.sentRequests) otherUser.sentRequests = [];
+      if (!otherUser.friendRequests) otherUser.friendRequests = [];
       otherUser.sentRequests = otherUser.sentRequests.filter((name) => name !== req.user.username);
       otherUser.friendRequests = otherUser.friendRequests.filter((name) => name !== req.user.username);
       await otherUser.save();
@@ -298,10 +319,14 @@ router.get("/profile/:username", async (req, res) => {
     let isPending = false; // Requester sent target a request
     let isSent = false;    // Target sent requester a request
 
+    const targetFriends = target.friends || [];
+    const targetFriendRequests = target.friendRequests || [];
+    const targetSentRequests = target.sentRequests || [];
+
     if (requester) {
-      isFriend = target.friends.includes(requester);
-      isPending = target.friendRequests.includes(requester);
-      isSent = target.sentRequests.includes(requester);
+      isFriend = targetFriends.includes(requester);
+      isPending = targetFriendRequests.includes(requester);
+      isSent = targetSentRequests.includes(requester);
     }
 
     const canViewPosts = !target.isPrivate || isFriend || requester === targetUsername;
@@ -314,7 +339,7 @@ router.get("/profile/:username", async (req, res) => {
       isPending,
       isSent,
       canViewPosts,
-      friendCount: target.friends.length,
+      friendCount: targetFriends.length,
     });
   } catch (err) {
     console.error("Get profile error:", err.message);

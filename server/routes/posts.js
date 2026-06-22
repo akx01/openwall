@@ -25,7 +25,7 @@ router.get("/", async (req, res) => {
 
     if (requester) {
       const requesterUser = await User.findOne({ username: requester }).select("friends").lean();
-      const friends = requesterUser ? requesterUser.friends : [];
+      const friends = (requesterUser && requesterUser.friends) ? requesterUser.friends : [];
       blockedUsernames = privateUsernames.filter(
         (u) => u !== requester && !friends.includes(u)
       );
