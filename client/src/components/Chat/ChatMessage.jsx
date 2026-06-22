@@ -74,14 +74,14 @@ export default function ChatMessage({ message, onReply }) {
         isOwn ? "flex-row-reverse" : ""
       } ${isOwn ? "animate-msg-right" : "animate-msg-left"}`}
     >
-      <div onClick={() => openProfile(message.author)} className="shrink-0 mt-1 cursor-pointer hover:scale-105 transition-transform">
+      <div onClick={(e) => { e.stopPropagation(); openProfile(message.author); }} className="shrink-0 mt-1 cursor-pointer hover:scale-105 transition-transform">
         <Avatar username={message.author} color={message.authorColor} size="sm" />
       </div>
 
       <div className={`max-w-[72%] flex flex-col ${isOwn ? "items-end" : "items-start"}`}>
         {/* Author + timestamp on hover */}
         <div className={`flex items-center gap-2 mb-0.5 ${isOwn ? "flex-row-reverse" : ""}`}>
-          <span onClick={() => openProfile(message.author)} className="text-xs font-bold text-gray-700 dark:text-gray-300 cursor-pointer hover:text-brand transition-colors">
+          <span onClick={(e) => { e.stopPropagation(); openProfile(message.author); }} className="text-xs font-bold text-gray-700 dark:text-gray-300 cursor-pointer hover:text-brand transition-colors">
             {message.author}
           </span>
           <span className="msg-timestamp text-[10px] text-gray-400">

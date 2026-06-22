@@ -21,9 +21,8 @@ export default function StoriesFeed() {
   const [loading, setLoading] = useState(true);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  // Fullscreen Viewer State
-  const [activeUserIndex, setActiveUserIndex] = useState(null);
-  const [activeStoryIndex, setActiveStoryIndex] = useState(0);
+  // Fullscreen Viewer State (combined to prevent out-of-bounds race conditions)
+  const [viewer, setViewer] = useState({ userIndex: null, storyIndex: 0 });
   const [progress, setProgress] = useState(0);
 
   const fetchStories = async () => {
@@ -56,6 +55,58 @@ export default function StoriesFeed() {
 
   const userStoryGroups = Object.values(grouped);
 
+  const activeUserIndex = viewer.userIndex;
+  const activeStoryIndex = viewer.storyIndex;
+
+  const handleNext = () => {
+    setViewer((prev) => {
+      if (prev.userIndex === null) return prev;
+      const currentGroup = userStoryGroups[prev.userIndex];
+      if (!currentGroup) return { userIndex: null, storyIndex: 0 };
+
+      if (prev.storyIndex < currentGroup.items.length - 1) {
+        return { ...prev, storyIndex: prev.storyIndex + 1 };
+      } else {
+        // Go to next user's story group
+        if (prev.userIndex < userStoryGroups.length - 1) {
+          return { userIndex: prev.userIndex + 1, storyIndex: 0 };
+        } else {
+          // End of all stories
+          return { userIndex: null, storyIndex: 0 };
+        }
+      }
+    });
+  };
+
+  const handlePrev = () => {
+    setViewer((prev) => {
+      if (prev.userIndex === null) return prev;
+      if (prev.storyIndex > 0) {
+        return { ...prev, storyIndex: prev.storyIndex - 1 };
+      } else {
+        // Go to previous user's story group
+        if (prev.userIndex > 0) {
+          const prevGroup = userStoryGroups[prev.userIndex - 1];
+          return { userIndex: prev.userIndex - 1, storyIndex: prevGroup.items.length - 1 };
+        } else {
+          // Restart current story if at absolute beginning
+          setProgress(0);
+          return prev;
+        }
+      }
+    });
+  };
+
+  const closeViewer = () => {
+    setViewer({ userIndex: null, storyIndex: 0 });
+    setProgress(0);
+  };
+
+  const openViewer = (index) => {
+    setViewer({ userIndex: index, storyIndex: 0 });
+    setProgress(0);
+  };
+
   // Auto-progress timer for stories
   useEffect(() => {
     if (activeUserIndex === null) return;
@@ -78,55 +129,8 @@ export default function StoriesFeed() {
     return () => clearInterval(timer);
   }, [activeUserIndex, activeStoryIndex]);
 
-  const handleNext = () => {
-    const currentGroup = userStoryGroups[activeUserIndex];
-    if (!currentGroup) return;
-
-    if (activeStoryIndex < currentGroup.items.length - 1) {
-      setActiveStoryIndex((prev) => prev + 1);
-    } else {
-      // Go to next user's story group
-      if (activeUserIndex < userStoryGroups.length - 1) {
-        setActiveUserIndex((prev) => prev + 1);
-        setActiveStoryIndex(0);
-      } else {
-        // End of all stories
-        closeViewer();
-      }
-    }
-  };
-
-  const handlePrev = () => {
-    if (activeStoryIndex > 0) {
-      setActiveStoryIndex((prev) => prev - 1);
-    } else {
-      // Go to previous user's story group
-      if (activeUserIndex > 0) {
-        setActiveUserIndex((prev) => prev - 1);
-        // Start at the last story of that group
-        const prevGroup = userStoryGroups[activeUserIndex - 1];
-        setActiveStoryIndex(prevGroup.items.length - 1);
-      } else {
-        // Restart current story if at absolute beginning
-        setProgress(0);
-      }
-    }
-  };
-
-  const closeViewer = () => {
-    setActiveUserIndex(null);
-    setActiveStoryIndex(0);
-    setProgress(0);
-  };
-
-  const openViewer = (index) => {
-    setActiveUserIndex(index);
-    setActiveStoryIndex(0);
-    setProgress(0);
-  };
-
   const currentGroup = activeUserIndex !== null ? userStoryGroups[activeUserIndex] : null;
-  const currentStory = currentGroup ? currentGroup.items[activeStoryIndex] : null;
+  const currentStory = currentGroup && currentGroup.items ? currentGroup.items[activeStoryIndex] || currentGroup.items[0] : null;
 
   return (
     <div className="w-full max-w-2xl mx-auto py-2">

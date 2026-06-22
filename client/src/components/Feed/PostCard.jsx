@@ -157,7 +157,10 @@ export default function PostCard({ post, index = 0 }) {
 
         {/* Bottom Profile Row */}
         <div
-          onClick={() => openProfile(post.author)}
+          onClick={(e) => {
+            e.stopPropagation();
+            openProfile(post.author);
+          }}
           className="flex items-center gap-3 pr-16 cursor-pointer hover:opacity-90 transition group/author"
         >
           <div className="relative shrink-0">
