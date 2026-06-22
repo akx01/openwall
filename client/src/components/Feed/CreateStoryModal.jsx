@@ -51,7 +51,7 @@ export default function CreateStoryModal({ onClose, onPublished }) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-3xl bg-white dark:bg-navy-800 p-6 space-y-4 border border-gray-100 dark:border-white/5 shadow-2xl animate-scale-in"
+        className="w-full max-w-md rounded-3xl bg-white dark:bg-navy-800 p-6 space-y-4 border border-gray-100 dark:border-white/5 shadow-2xl animate-scale-in max-h-[90vh] overflow-y-auto no-scrollbar"
       >
         <div className="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-white/5">
           <h2 className="text-lg font-bold text-gray-900 dark:text-gray-50 flex items-center gap-1.5">
@@ -66,7 +66,7 @@ export default function CreateStoryModal({ onClose, onPublished }) {
         <div className="space-y-1">
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Story Preview</p>
           <div
-            className={`w-full aspect-[9/16] rounded-2xl ${selectedTheme.bg} p-6 flex flex-col justify-between shadow-inner relative overflow-hidden`}
+            className={`h-56 aspect-[9/16] mx-auto rounded-2xl ${selectedTheme.bg} p-4 flex flex-col justify-between shadow-inner relative overflow-hidden`}
           >
             {/* Soft Ambient Overlay */}
             <div className="absolute inset-0 bg-black/10 pointer-events-none" />
@@ -74,27 +74,27 @@ export default function CreateStoryModal({ onClose, onPublished }) {
             {/* Header info */}
             <div className="flex items-center gap-2 relative z-10">
               <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm border border-white/20"
+                className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-sm border border-white/20"
                 style={{ background: color || "#EF4444" }}
               >
                 {username?.[0]?.toUpperCase() || "Y"}
               </div>
               <div>
-                <p className="font-bold text-xs text-white drop-shadow">{username || "You"}</p>
-                <p className="text-[9px] text-white/80 drop-shadow">Now</p>
+                <p className="font-bold text-[10px] text-white drop-shadow leading-none">{username || "You"}</p>
+                <p className="text-[8px] text-white/80 drop-shadow mt-0.5">Now</p>
               </div>
             </div>
 
             {/* Content Text */}
-            <div className="flex-1 flex items-center justify-center relative z-10 py-6">
-              <p className="text-white text-center font-display text-lg font-extrabold leading-snug drop-shadow-md break-words max-h-full overflow-y-auto no-scrollbar w-full px-2">
+            <div className="flex-1 flex items-center justify-center relative z-10 py-2">
+              <p className="text-white text-center font-display text-xs font-extrabold leading-snug drop-shadow-md break-words max-h-full overflow-y-auto no-scrollbar w-full px-1">
                 {content || "Type something cool..."}
               </p>
             </div>
 
             {/* Bottom watermark */}
             <div className="text-center relative z-10">
-              <p className="text-[10px] text-white/40 tracking-wider font-bold font-display uppercase">Openwall Stories</p>
+              <p className="text-[8px] text-white/40 tracking-wider font-bold font-display uppercase">Openwall Stories</p>
             </div>
           </div>
         </div>

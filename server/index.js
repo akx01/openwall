@@ -15,7 +15,7 @@ const httpServer = http.createServer(app);
 app.use(cors({
   origin: "*",           // allow every origin
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization", "x-admin-secret", "x-room-password"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-admin-secret", "x-room-password", "x-username", "x-password-hash"],
 }));
 app.options("*", cors()); // handle preflight for every route
 
