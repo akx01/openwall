@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { generateColor, generateSessionId } from "../utils/helpers";
+import axios from "axios";
+
+const API = import.meta.env.VITE_API_URL || "/api";
 
 // Simple client-side password guard using Web Crypto (SHA-256)
 async function hashPassword(plain) {
@@ -39,13 +42,30 @@ export const useUserStore = create(
       clearSession: () =>
         set({ username: "", passwordHash: "", color: generateColor(), sessionId: generateSessionId(), pinnedRooms: [] }),
 
-      // Register: set username + hash password
+      // Register: set username + hash password and sync to backend
       register: async (username, password) => {
         const hash = await hashPassword(password);
-        set({ username, passwordHash: hash });
+        const color = get().color || generateColor();
+        await axios.post(`${API}/users/sync`, {
+          username,
+          passwordHash: hash,
+          color,
+        });
+        set({ username, passwordHash: hash, color });
       },
 
-      // Login: verify password matches stored hash — returns true/false
+      // Login: verify password matches backend stored hash
+      login: async (username, password) => {
+        const hash = await hashPassword(password);
+        const { data } = await axios.post(`${API}/users/sync`, {
+          username,
+          passwordHash: hash,
+        });
+        set({ username: data.username, passwordHash: hash, color: data.color });
+        return data;
+      },
+
+      // Local fallback verify password matches stored hash
       verifyPassword: async (password) => {
         const hash = await hashPassword(password);
         return hash === get().passwordHash;

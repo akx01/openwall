@@ -13,6 +13,52 @@ exports.initSocketHandlers = (io) => {
   io.on("connection", (socket) => {
     console.log("Connected:", socket.id);
 
+    // ── DIRECT MESSAGES & FRIENDS ──────────────
+    socket.on("join_user_dm", ({ username }) => {
+      if (!username) return;
+      const normalized = username.toLowerCase().trim();
+      socket.join(`user_${normalized}`);
+      console.log(`Socket ${socket.id} joined DM room: user_${normalized}`);
+    });
+
+    socket.on("send_direct_message", async ({ sender, recipient, content, passwordHash }) => {
+      if (!sender || !recipient || !content) return;
+      const normalizedSender = sender.toLowerCase().trim();
+      const normalizedRecipient = recipient.toLowerCase().trim();
+
+      try {
+        const User = require("../models/User");
+        const senderDoc = await User.findOne({ username: normalizedSender });
+        if (!senderDoc || senderDoc.passwordHash !== passwordHash) {
+          socket.emit("dm_error", { error: "Authentication failed" });
+          return;
+        }
+
+        if (!senderDoc.friends.includes(normalizedRecipient)) {
+          socket.emit("dm_error", { error: "You can only message your friends" });
+          return;
+        }
+
+        const { clean } = require("../middleware/profanityFilter");
+        const { sanitizeString } = require("../middleware/sanitize");
+        const cleanContent = clean(sanitizeString(content));
+        if (!cleanContent || cleanContent.length > 1000) return;
+
+        const DirectMessage = require("../models/DirectMessage");
+        const dm = await DirectMessage.create({
+          sender: normalizedSender,
+          recipient: normalizedRecipient,
+          content: cleanContent,
+        });
+
+        // Broadcast to both users
+        io.to(`user_${normalizedSender}`).emit("new_direct_message", dm);
+        io.to(`user_${normalizedRecipient}`).emit("new_direct_message", dm);
+      } catch (err) {
+        console.error("DM error:", err.message);
+      }
+    });
+
     // ── JOIN ROOM ─────────────────────────────
     socket.on("join_room", async ({ room, username, color, sessionId, password }) => {
       const roomDoc = await Room.findOne({ name: room });

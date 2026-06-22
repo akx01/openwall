@@ -4,6 +4,9 @@ import { useUIStore } from "./store/uiStore";
 import { useChatStore } from "./store/chatStore";
 import { useRoomStore } from "./store/roomStore";
 import { useSocket } from "./hooks/useSocket";
+import { useDmStore } from "./store/dmStore";
+import DmDrawer from "./components/Chat/DmDrawer";
+import axios from "axios";
 
 import Feed from "./components/Feed/Feed";
 import PostModal from "./components/Feed/PostModal";
@@ -20,7 +23,7 @@ import OnlinePresence from "./components/UI/OnlinePresence";
 import EmojiReactionBurst from "./components/UI/EmojiReactionBurst";
 import BrandLogo from "./components/UI/BrandLogo";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, MessageSquare, FileText, Edit3, Sun, Moon } from "lucide-react";
+import { Home, MessageSquare, FileText, Edit3, Sun, Moon, Send } from "lucide-react";
 
 // ─── Animated Theme Toggle ───────────────────
 function ThemeToggle({ darkMode, onToggle }) {
@@ -76,16 +79,13 @@ function AuthGate({ onSuccess }) {
         showToast(`Welcome, ${form.username.trim()}! 🎉`, "success");
         onSuccess();
       } else {
-        // Login: username must match stored, password must match
-        const storedUser = useUserStore.getState().username;
-        if (form.username.trim().toLowerCase() !== storedUser.toLowerCase()) {
-          return setError("Username not found. Register instead?");
-        }
-        const ok = await verifyPassword(form.password);
-        if (!ok) return setError("Wrong password");
-        showToast(`Welcome back, ${storedUser}! 👋`, "success");
+        const { login } = useUserStore.getState();
+        await login(form.username.trim(), form.password);
+        showToast(`Welcome back, ${form.username.trim()}! 👋`, "success");
         onSuccess();
       }
+    } catch (err) {
+      setError(err.response?.data?.error || err.message || "Authentication failed");
     } finally {
       setLoading(false);
     }
@@ -258,6 +258,9 @@ export default function App() {
   const { loadRooms } = useChatStore();
   const { activeRoom } = useRoomStore();
 
+  const { setDmOpen, getTotalUnreadCount } = useDmStore();
+  const totalUnread = getTotalUnreadCount();
+
   // Entered = has a valid account AND username set
   const [entered, setEntered] = useState(() => {
     const store = useUserStore.getState();
@@ -272,7 +275,28 @@ export default function App() {
     loadRooms();
     document.documentElement.classList.toggle("dark", darkMode);
     document.body.classList.toggle("dark", darkMode);
-  }, [darkMode]);
+
+    if (entered && username) {
+      const syncProfile = async () => {
+        try {
+          const { passwordHash, color: userColor } = useUserStore.getState();
+          await axios.post("/api/users/sync", {
+            username,
+            passwordHash,
+            color: userColor,
+          });
+        } catch (err) {
+          console.error("Backend profile sync failed:", err.response?.data?.error || err.message);
+          if (err.response?.status === 401) {
+            useUIStore.getState().showToast("Session expired or credentials conflict. Re-login required.", "error");
+            useUserStore.getState().clearSession();
+            setEntered(false);
+          }
+        }
+      };
+      syncProfile();
+    }
+  }, [darkMode, entered, username]);
 
   if (!entered || !username) {
     return <AuthGate onSuccess={() => setEntered(true)} />;
@@ -322,6 +346,22 @@ export default function App() {
         <div className="flex items-center gap-2.5 shrink-0">
           {/* Live presence */}
           <OnlinePresence />
+
+          {/* DM Button (Instagram paper airplane style) */}
+          <motion.button
+            onClick={() => setDmOpen(true)}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 dark:bg-navy-800 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-white/5 shadow-sm transition-all cursor-pointer relative"
+            title="Direct Messages"
+          >
+            <Send size={16} className="-rotate-45 -translate-y-0.5 translate-x-0.5 text-gray-600 dark:text-gray-300 hover:text-brand dark:hover:text-brand" />
+            {totalUnread > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white font-black text-[9px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-navy-900 animate-scale-in">
+                {totalUnread}
+              </span>
+            )}
+          </motion.button>
 
           {/* Theme toggle */}
           <ThemeToggle darkMode={darkMode} onToggle={toggleDarkMode} />
@@ -374,6 +414,7 @@ export default function App() {
         hasActiveRoom={!!activeRoom}
       />
 
+      <DmDrawer />
       <ToastContainer />
     </div>
   );

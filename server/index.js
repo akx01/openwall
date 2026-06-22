@@ -56,6 +56,12 @@ try { app.use("/api/notepad",  require("./routes/notepad"));  console.log("✅ n
 try { app.use("/api/stories",  require("./routes/stories"));  console.log("✅ stories"); }
   catch(e) { console.error("stories route error:", e.message); }
 
+try { app.use("/api/users",    require("./routes/users"));    console.log("✅ users"); }
+  catch(e) { console.error("users route error:", e.message); }
+
+try { app.use("/api/dms",      require("./routes/dms"));      console.log("✅ dms"); }
+  catch(e) { console.error("dms route error:", e.message); }
+
 // ── Global error handler ─────────────────────
 app.use((err, req, res, next) => {
   console.error("🔥 Error:", err.message);
@@ -68,6 +74,7 @@ const io = new Server(httpServer, {
   transports: ["websocket", "polling"],
   allowEIO3: true,
 });
+app.set("io", io);
 
 try {
   const { initSocketHandlers } = require("./socket/handlers");
