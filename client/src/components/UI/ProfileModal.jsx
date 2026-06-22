@@ -180,17 +180,21 @@ export default function ProfileModal() {
                     </h3>
                     <div className="flex items-center justify-center gap-2">
                       <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-gray-100 dark:bg-navy-850 text-gray-500 dark:text-gray-400">
-                        {profile.isPrivate ? "🔒 Private Account" : "🌐 Public Account"}
+                        {profile.isGuest ? "🌐 Unregistered User" : profile.isPrivate ? "🔒 Private Account" : "🌐 Public Account"}
                       </span>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-violet-50 dark:bg-violet-950/20 text-brand">
-                        👥 {profile.friendCount} friends
-                      </span>
+                      {!profile.isGuest && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-violet-50 dark:bg-violet-950/20 text-brand">
+                          👥 {profile.friendCount} friends
+                        </span>
+                      )}
                     </div>
                   </div>
 
                   {/* Profile Action Buttons */}
                   <div className="flex justify-center gap-2.5 pt-2">
-                    {profile.username === myUsername ? (
+                    {profile.isGuest ? (
+                      <span className="text-xs text-gray-400 font-semibold italic">Temporary/Guest Writer account</span>
+                    ) : profile.username === myUsername ? (
                       <span className="text-xs text-gray-400 font-semibold italic">This is your profile card</span>
                     ) : profile.isFriend ? (
                       <>

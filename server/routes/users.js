@@ -310,7 +310,22 @@ router.get("/profile/:username", async (req, res) => {
       .lean();
 
     if (!target) {
-      return res.status(404).json({ error: "User not found" });
+      // Try to find a post by this author to retrieve their custom color, default to gray
+      const Post = require("../models/Post");
+      const samplePost = await Post.findOne({ author: targetUsername }).select("authorColor").lean();
+      const guestColor = samplePost ? samplePost.authorColor : "#9CA3AF";
+
+      return res.json({
+        username: targetUsername,
+        color: guestColor,
+        isPrivate: false,
+        isFriend: false,
+        isPending: false,
+        isSent: false,
+        canViewPosts: true,
+        friendCount: 0,
+        isGuest: true,
+      });
     }
 
     const requester = req.headers["x-username"] ? req.headers["x-username"].toLowerCase().trim() : null;
