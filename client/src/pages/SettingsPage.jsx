@@ -3,23 +3,41 @@ import { useUserStore } from "../store/userStore";
 import { useUIStore } from "../store/uiStore";
 import Avatar from "../components/UI/Avatar";
 import { generateColor } from "../utils/helpers";
+import axios from "axios";
 
+const API = import.meta.env.VITE_API_URL || "/api";
 const COLORS = ["#7C3AED", "#2563EB", "#DC2626", "#16A34A", "#D97706", "#DB2777", "#0891B2"];
 
 export default function SettingsPage({ onClose }) {
   const {
-    username, color, mutedUsers,
-    setUsername, setColor, unmuteUser,
+    username, passwordHash, color, mutedUsers, isPrivate,
+    setUsername, setColor, unmuteUser, togglePrivacy,
     toggleNotifications, notifications, clearSession,
   } = useUserStore();
   const { showToast } = useUIStore();
   const [draft, setDraft] = useState(username);
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!draft.trim()) { showToast("Username cannot be empty", "error"); return; }
-    setUsername(draft.trim());
-    showToast("Username updated!", "success");
-    onClose?.();
+    setSaving(true);
+    try {
+      // Sync change to backend to verify username isn't taken and save private toggle/color
+      await axios.post(`${API}/users/sync`, {
+        username: draft.trim(),
+        passwordHash,
+        color,
+        isPrivate,
+      });
+
+      setUsername(draft.trim());
+      showToast("Profile settings saved and synced! ✨", "success");
+      onClose?.();
+    } catch (err) {
+      showToast(err.response?.data?.error || "Failed to update profile", "error");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -73,12 +91,26 @@ export default function SettingsPage({ onClose }) {
 
         {/* Notifications */}
         <div className="flex items-center justify-between mb-4">
-          <span className="text-sm text-gray-700 dark:text-gray-300">Notifications</span>
+          <span className="text-sm text-gray-700 dark:text-gray-300 font-semibold">Notifications</span>
           <button
             onClick={toggleNotifications}
-            className={`w-10 h-6 rounded-full transition-colors ${notifications ? "bg-brand" : "bg-gray-300 dark:bg-gray-600"}`}
+            className={`w-10 h-6 rounded-full transition-colors ${notifications ? "bg-brand" : "bg-gray-300 dark:bg-gray-600"} cursor-pointer`}
           >
             <span className={`block w-4 h-4 bg-white rounded-full shadow transform transition-transform mx-1 ${notifications ? "translate-x-4" : ""}`} />
+          </button>
+        </div>
+
+        {/* Private Account */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col text-left">
+            <span className="text-sm text-gray-700 dark:text-gray-300 font-semibold">Private Account</span>
+            <span className="text-[10px] text-gray-400">Only friends can view your posts and chat</span>
+          </div>
+          <button
+            onClick={togglePrivacy}
+            className={`w-10 h-6 rounded-full transition-colors ${isPrivate ? "bg-brand" : "bg-gray-300 dark:bg-gray-600"} cursor-pointer`}
+          >
+            <span className={`block w-4 h-4 bg-white rounded-full shadow transform transition-transform mx-1 ${isPrivate ? "translate-x-4" : ""}`} />
           </button>
         </div>
 
@@ -100,16 +132,17 @@ export default function SettingsPage({ onClose }) {
         {/* Clear local data */}
         <button
           onClick={() => { clearSession(); showToast("Session cleared", "info"); onClose?.(); }}
-          className="w-full text-sm text-red-400 hover:text-red-600 py-2 mt-1 transition"
+          className="w-full text-sm text-red-400 hover:text-red-600 py-2 mt-1 transition cursor-pointer"
         >
           🗑️ Clear local data & reset session
         </button>
 
         <button
           onClick={handleSave}
-          className="w-full mt-3 py-3 bg-brand text-white rounded-xl font-semibold hover:bg-brand-dark transition"
+          disabled={saving}
+          className="w-full mt-3 py-3 bg-brand text-white rounded-xl font-semibold hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
-          Save changes
+          {saving ? "Saving changes..." : "Save changes"}
         </button>
       </div>
     </div>

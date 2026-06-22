@@ -8,7 +8,7 @@ import axios from "axios";
 const API = import.meta.env.VITE_API_URL || "/api";
 
 export default function CommentModal() {
-  const { selectedPost, closeModal, showToast } = useUIStore();
+  const { selectedPost, closeModal, showToast, openProfile } = useUIStore();
   const { username, color } = useUserStore();
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
@@ -98,9 +98,11 @@ export default function CommentModal() {
           ) : (
             comments.map((c, i) => (
               <div key={i} className="flex gap-3 animate-slide-up">
-                <Avatar username={c.author} color={c.authorColor} size="sm" />
+                <div onClick={() => openProfile(c.author)} className="cursor-pointer hover:scale-105 transition-transform shrink-0">
+                  <Avatar username={c.author} color={c.authorColor} size="sm" />
+                </div>
                 <div className="bg-gray-50 dark:bg-navy-700 rounded-2xl px-3 py-2 flex-1 border border-gray-100/50 dark:border-white/5">
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">{c.author}</span>
+                  <span onClick={() => openProfile(c.author)} className="text-xs font-bold text-gray-800 dark:text-gray-200 cursor-pointer hover:text-brand transition-colors">{c.author}</span>
                   <p className="text-xs text-gray-650 dark:text-gray-350 mt-0.5 leading-relaxed">{c.content}</p>
                 </div>
               </div>

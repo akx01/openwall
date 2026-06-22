@@ -6,6 +6,7 @@ import { useRoomStore } from "./store/roomStore";
 import { useSocket } from "./hooks/useSocket";
 import { useDmStore } from "./store/dmStore";
 import DmDrawer from "./components/Chat/DmDrawer";
+import ProfileModal from "./components/UI/ProfileModal";
 import axios from "axios";
 
 import Feed from "./components/Feed/Feed";
@@ -414,6 +415,7 @@ export default function App() {
         hasActiveRoom={!!activeRoom}
       />
 
+      <ProfileModal />
       <DmDrawer />
       <ToastContainer />
     </div>

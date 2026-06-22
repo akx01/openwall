@@ -172,7 +172,7 @@ export default function StoriesFeed() {
                     className="w-full h-full flex items-center justify-center font-bold text-white text-base select-none"
                     style={{ background: group.authorColor || "#EF4444" }}
                   >
-                    {group.author[0].toUpperCase()}
+                    {(group.author?.[0] || "?").toUpperCase()}
                   </div>
                 </div>
               </div>
@@ -206,18 +206,18 @@ export default function StoriesFeed() {
               
               {/* Animated Progress Bars at Top */}
               <div className="absolute top-4 inset-x-4 z-30 flex gap-1.5">
-                {currentGroup.items.map((item, idx) => (
+                {currentGroup?.items?.map((item, idx) => (
                   <div key={item._id} className="h-1 flex-1 bg-white/25 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-white transition-all duration-75"
-                      style={{
-                        width:
-                          idx < activeStoryIndex
-                            ? "100%"
-                            : idx === activeStoryIndex
-                            ? `${progress}%`
-                            : "0%",
-                      }}
+                       className="h-full bg-white transition-all duration-75"
+                       style={{
+                         width:
+                           idx < activeStoryIndex
+                             ? "100%"
+                             : idx === activeStoryIndex
+                             ? `${progress}%`
+                             : "0%",
+                       }}
                     />
                   </div>
                 ))}
@@ -228,12 +228,12 @@ export default function StoriesFeed() {
                 <div className="flex items-center gap-2">
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm border border-white/20"
-                    style={{ background: currentGroup.authorColor }}
+                    style={{ background: currentGroup?.authorColor || "#EF4444" }}
                   >
-                    {currentGroup.author[0].toUpperCase()}
+                    {(currentGroup?.author?.[0] || "?").toUpperCase()}
                   </div>
                   <div>
-                    <span className="font-bold text-xs text-white drop-shadow">{currentGroup.author}</span>
+                    <span className="font-bold text-xs text-white drop-shadow">{currentGroup?.author || "Anonymous"}</span>
                   </div>
                 </div>
                 <button
@@ -245,12 +245,12 @@ export default function StoriesFeed() {
               </div>
 
               {/* Background gradient theme */}
-              <div className={`absolute inset-0 ${STORY_THEMES[currentStory.theme] || STORY_THEMES.fire} flex flex-col justify-center p-8 text-center`}>
+              <div className={`absolute inset-0 ${(currentStory && STORY_THEMES[currentStory.theme]) || STORY_THEMES.fire} flex flex-col justify-center p-8 text-center`}>
                 <div className="absolute inset-0 bg-black/10 pointer-events-none" />
                 
                 {/* Content Text */}
                 <p className="text-white font-display text-xl font-extrabold leading-snug drop-shadow-md break-words max-h-[60%] overflow-y-auto no-scrollbar px-2 relative z-10 select-none">
-                  {currentStory.content}
+                  {currentStory?.content || ""}
                 </p>
               </div>
 

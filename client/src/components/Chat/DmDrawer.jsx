@@ -374,7 +374,16 @@ export default function DmDrawer() {
                               className="flex items-center justify-between p-3 rounded-2xl bg-gray-50 hover:bg-gray-100 dark:bg-navy-800/40 dark:hover:bg-navy-800/80 border border-gray-100/50 dark:border-white/5 transition-all cursor-pointer"
                             >
                               <div className="flex items-center gap-3">
-                                <Avatar username={friend} size="md" />
+                                <div
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    useUIStore.getState().openProfile(friend);
+                                  }}
+                                  className="hover:scale-105 transition-transform"
+                                  title="View Profile"
+                                >
+                                  <Avatar username={friend} size="md" />
+                                </div>
                                 <div className="text-left">
                                   <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
                                     {friend}

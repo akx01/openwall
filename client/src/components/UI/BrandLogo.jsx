@@ -1,7 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 
 export default function BrandLogo({ className = "", size = "md", glow = true }) {
+  const [isTapped, setIsTapped] = useState(false);
+
+  const handleTap = () => {
+    setIsTapped(true);
+    setTimeout(() => setIsTapped(false), 1500);
+  };
   const isSm = size === "sm";
   const isLg = size === "lg";
   const logoSize = isSm ? "w-7 h-7 mr-1.5" : isLg ? "w-14 h-14 mr-3" : "w-10 h-10 mr-2";
@@ -95,8 +101,9 @@ export default function BrandLogo({ className = "", size = "md", glow = true }) 
   return (
     <motion.div
       initial="hidden"
-      animate="visible"
+      animate={isTapped ? "hover" : "visible"}
       whileHover="hover"
+      onClick={handleTap}
       className={`flex items-center select-none cursor-pointer group ${className}`}
     >
       {/* The Animated Brick Wall "O" Letter */}

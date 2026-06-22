@@ -2,8 +2,9 @@ import { create } from "zustand";
 
 export const useUIStore = create((set) => ({
   toasts: [],
-  activeModal: null, // "createPost" | "postDetail" | "settings" | null
+  activeModal: null, // "createPost" | "postDetail" | "settings" | "profile" | null
   selectedPost: null,
+  profileUser: null,
 
   showToast: (message, type = "info") => {
     const id = Date.now();
@@ -12,5 +13,7 @@ export const useUIStore = create((set) => ({
   },
 
   openModal: (modal, data = null) => set({ activeModal: modal, selectedPost: data }),
-  closeModal: () => set({ activeModal: null, selectedPost: null }),
+  closeModal: () => set({ activeModal: null, selectedPost: null, profileUser: null }),
+  openProfile: (username) => set({ activeModal: "profile", profileUser: username }),
+  closeProfile: () => set({ activeModal: null, profileUser: null }),
 }));

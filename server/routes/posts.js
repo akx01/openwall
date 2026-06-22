@@ -9,11 +9,38 @@ const { body, validationResult } = require("express-validator");
 // ── GET /api/posts — fetch posts (paginated, sortable, searchable)
 router.get("/", async (req, res) => {
   try {
-    const { page = 1, limit = 20, sort = "latest", search, tag, room } = req.query;
+    const { page = 1, limit = 20, sort = "latest", search, tag, room, author } = req.query;
 
     const query = { hidden: false };
     if (room) query.room = room;
     if (tag) query.tags = tag;
+
+    // Enforce Public/Private account privacy check
+    const User = require("../models/User");
+    const privateUsers = await User.find({ isPrivate: true }).select("username").lean();
+    const privateUsernames = privateUsers.map((u) => u.username);
+
+    const requester = req.headers["x-username"] ? req.headers["x-username"].toLowerCase().trim() : null;
+    let blockedUsernames = privateUsernames;
+
+    if (requester) {
+      const requesterUser = await User.findOne({ username: requester }).select("friends").lean();
+      const friends = requesterUser ? requesterUser.friends : [];
+      blockedUsernames = privateUsernames.filter(
+        (u) => u !== requester && !friends.includes(u)
+      );
+    }
+
+    if (author) {
+      const targetAuthor = author.toLowerCase().trim();
+      if (blockedUsernames.includes(targetAuthor)) {
+        query.author = "__private_locked_author_placeholder__";
+      } else {
+        query.author = targetAuthor;
+      }
+    } else {
+      query.author = { $nin: blockedUsernames };
+    }
     if (search) {
       const words = search.trim().split(/\s+/).filter(Boolean);
       if (words.length > 0) {

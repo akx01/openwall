@@ -26,11 +26,13 @@ export const useUserStore = create(
       notifications: true,
       mutedUsers: [],
       pinnedRooms: [],
+      isPrivate: false,
 
       setUsername: (username) => set({ username }),
       setColor: (color) => set({ color }),
       toggleDarkMode: () => set((s) => ({ darkMode: !s.darkMode })),
       toggleNotifications: () => set((s) => ({ notifications: !s.notifications })),
+      togglePrivacy: () => set((s) => ({ isPrivate: !s.isPrivate })),
       muteUser: (username) =>
         set((s) => ({ mutedUsers: [...new Set([...s.mutedUsers, username])] })),
       unmuteUser: (username) =>
@@ -40,18 +42,19 @@ export const useUserStore = create(
       unpinRoom: (roomName) =>
         set((s) => ({ pinnedRooms: s.pinnedRooms.filter((r) => r !== roomName) })),
       clearSession: () =>
-        set({ username: "", passwordHash: "", color: generateColor(), sessionId: generateSessionId(), pinnedRooms: [] }),
+        set({ username: "", passwordHash: "", color: generateColor(), sessionId: generateSessionId(), pinnedRooms: [], isPrivate: false }),
 
       // Register: set username + hash password and sync to backend
       register: async (username, password) => {
         const hash = await hashPassword(password);
         const color = get().color || generateColor();
-        await axios.post(`${API}/users/sync`, {
+        const { data } = await axios.post(`${API}/users/sync`, {
           username,
           passwordHash: hash,
           color,
+          isPrivate: false,
         });
-        set({ username, passwordHash: hash, color });
+        set({ username, passwordHash: hash, color, isPrivate: !!data.isPrivate });
       },
 
       // Login: verify password matches backend stored hash
@@ -61,7 +64,7 @@ export const useUserStore = create(
           username,
           passwordHash: hash,
         });
-        set({ username: data.username, passwordHash: hash, color: data.color });
+        set({ username: data.username, passwordHash: hash, color: data.color, isPrivate: !!data.isPrivate });
         return data;
       },
 

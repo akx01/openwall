@@ -19,7 +19,7 @@ const PREMIUM_THEMES = new Set(["starfield", "glitch", "polaroid"]);
 export default function PostCard({ post, index = 0 }) {
   const { sessionId } = useUserStore();
   const { toggleLike } = usePostStore();
-  const { showToast, openModal } = useUIStore();
+  const { showToast, openModal, openProfile } = useUIStore();
   const [copying, setCopying] = useState(false);
   const [localReacts, setLocalReacts] = useState(post.quickReacts || {});
   const [showReactBar, setShowReactBar] = useState(false);
@@ -156,17 +156,20 @@ export default function PostCard({ post, index = 0 }) {
         </div>
 
         {/* Bottom Profile Row */}
-        <div className="flex items-center gap-3 pr-16">
+        <div
+          onClick={() => openProfile(post.author)}
+          className="flex items-center gap-3 pr-16 cursor-pointer hover:opacity-90 transition group/author"
+        >
           <div className="relative shrink-0">
             {/* Glowing avatar ring */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-brand to-yellow-500 blur-sm opacity-70 animate-pulse" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-brand to-yellow-500 blur-sm opacity-70 animate-pulse group-hover/author:scale-105 transition-all" />
             <div className="relative">
               <Avatar username={post.author} color={post.authorColor} size="md" />
             </div>
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <p className="font-bold text-sm text-white truncate post-title">
+              <p className="font-bold text-sm text-white truncate post-title group-hover/author:text-brand transition-colors">
                 {post.author}
               </p>
               <span className="text-[10px] text-white/50">•</span>

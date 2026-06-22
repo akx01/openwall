@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema(
       type: [String], // Array of usernames this user sent requests to
       default: [],
     },
+    isPrivate: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

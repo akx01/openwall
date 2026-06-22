@@ -31,7 +31,7 @@ const authenticateUser = async (req, res, next) => {
 // ── POST /api/users/sync — Register or sync local profile with database
 router.post("/sync", sanitizeBody, async (req, res) => {
   try {
-    const { username, passwordHash, color } = req.body;
+    const { username, passwordHash, color, isPrivate } = req.body;
     if (!username || !passwordHash) {
       return res.status(400).json({ error: "Username and password hash are required" });
     }
@@ -44,20 +44,45 @@ router.post("/sync", sanitizeBody, async (req, res) => {
       if (user.passwordHash !== passwordHash) {
         return res.status(401).json({ error: "Username already taken or wrong password." });
       }
+      
+      let modified = false;
       // Update color if changed
       if (color && user.color !== color) {
         user.color = color;
+        modified = true;
+      }
+      // Update isPrivate if changed
+      if (typeof isPrivate === "boolean" && user.isPrivate !== isPrivate) {
+        user.isPrivate = isPrivate;
+        modified = true;
+      }
+
+      if (modified) {
         await user.save();
       }
-      return res.json({ success: true, isNew: false, username: user.username, color: user.color });
+
+      return res.json({
+        success: true,
+        isNew: false,
+        username: user.username,
+        color: user.color,
+        isPrivate: !!user.isPrivate,
+      });
     } else {
       // Create new backend profile
       user = await User.create({
         username: normalized,
         passwordHash,
         color: color || "#7C3AED",
+        isPrivate: !!isPrivate,
       });
-      return res.status(201).json({ success: true, isNew: true, username: user.username, color: user.color });
+      return res.status(201).json({
+        success: true,
+        isNew: true,
+        username: user.username,
+        color: user.color,
+        isPrivate: !!user.isPrivate,
+      });
     }
   } catch (err) {
     console.error("Sync user error:", err.message);
@@ -252,6 +277,48 @@ router.post("/friend-request/decline", authenticateUser, async (req, res) => {
   } catch (err) {
     console.error("Decline friend request error:", err.message);
     res.status(500).json({ error: "Failed to decline request" });
+  }
+});
+
+// ── GET /api/users/profile/:username — Get public profile details
+router.get("/profile/:username", async (req, res) => {
+  try {
+    const targetUsername = req.params.username.toLowerCase().trim();
+    const target = await User.findOne({ username: targetUsername })
+      .select("username color isPrivate friends friendRequests sentRequests")
+      .lean();
+
+    if (!target) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const requester = req.headers["x-username"] ? req.headers["x-username"].toLowerCase().trim() : null;
+    
+    let isFriend = false;
+    let isPending = false; // Requester sent target a request
+    let isSent = false;    // Target sent requester a request
+
+    if (requester) {
+      isFriend = target.friends.includes(requester);
+      isPending = target.friendRequests.includes(requester);
+      isSent = target.sentRequests.includes(requester);
+    }
+
+    const canViewPosts = !target.isPrivate || isFriend || requester === targetUsername;
+
+    res.json({
+      username: target.username,
+      color: target.color,
+      isPrivate: !!target.isPrivate,
+      isFriend,
+      isPending,
+      isSent,
+      canViewPosts,
+      friendCount: target.friends.length,
+    });
+  } catch (err) {
+    console.error("Get profile error:", err.message);
+    res.status(500).json({ error: "Failed to load user profile" });
   }
 });
 

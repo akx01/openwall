@@ -8,7 +8,27 @@ const { body, validationResult } = require("express-validator");
 // ── GET /api/stories — fetch active stories
 router.get("/", async (req, res) => {
   try {
-    const stories = await Story.find().sort({ createdAt: -1 }).lean();
+    const User = require("../models/User");
+    const privateUsers = await User.find({ isPrivate: true }).select("username").lean();
+    const privateUsernames = privateUsers.map((u) => u.username);
+
+    const requester = req.headers["x-username"] ? req.headers["x-username"].toLowerCase().trim() : null;
+    let blockedUsernames = privateUsernames;
+
+    if (requester) {
+      const requesterUser = await User.findOne({ username: requester }).select("friends").lean();
+      const friends = requesterUser ? requesterUser.friends : [];
+      blockedUsernames = privateUsernames.filter(
+        (u) => u !== requester && !friends.includes(u)
+      );
+    }
+
+    const stories = await Story.find({
+      author: { $nin: blockedUsernames }
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
     res.json(stories);
   } catch (err) {
     res.status(500).json({ error: "Failed to load stories" });
