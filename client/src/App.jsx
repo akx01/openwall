@@ -7,6 +7,7 @@ import { useSocket } from "./hooks/useSocket";
 import { useDmStore } from "./store/dmStore";
 import DmDrawer from "./components/Chat/DmDrawer";
 import ProfileModal from "./components/UI/ProfileModal";
+import UserSearch from "./components/UI/UserSearch";
 import axios from "axios";
 
 import Feed from "./components/Feed/Feed";

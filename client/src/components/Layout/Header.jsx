@@ -1,5 +1,6 @@
 import { useUIStore } from "../../store/uiStore";
 import { useUserStore } from "../../store/userStore";
+import { Search } from "lucide-react";
 
 export default function Header({ onOpenSettings }) {
   const { openModal } = useUIStore();
@@ -23,6 +24,14 @@ export default function Header({ onOpenSettings }) {
           className="bg-brand text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-brand-dark transition shadow-sm"
         >
           + Write
+        </button>
+        {/* Search Button */}
+        <button
+          onClick={() => openModal("search")}
+          className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-navy-800 transition"
+          title="Search users"
+        >
+          <Search size={20} className="text-gray-600 dark:text-gray-300" />
         </button>
       </div>
     </div>
